@@ -18,7 +18,7 @@
     <description>内部邮件独立微服务</description>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
         <minio.version>8.5.7</minio.version>

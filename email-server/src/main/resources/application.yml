@@ -67,6 +67,12 @@ email:
       url: ${OA_DB_URL:jdbc:oracle:thin:@127.0.0.1:1521:orcl}
       username: ${OA_DB_USER:seeyon}
       password: ${OA_DB_PASSWORD:seeyon}
+  # AI 配置（通义千问 / DashScope API）
+  ai:
+    api-url: ${AI_API_URL:https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions}
+    api-key: ${AI_API_KEY:sk-11fa0019a3874de78354a1d85e0b78cb}
+    model: ${AI_MODEL:qwen-plus}
+    timeout: 60000
   # 业务开关
   feature:
     # 是否启用跨网邮件功能（独立部署后一般关闭）
