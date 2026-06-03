@@ -54,6 +54,8 @@ public class SecurityConfig {
                 .antMatchers("/doc.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                 // 健康检查放行
                 .antMatchers("/actuator/health").permitAll()
+                // 开发自测放行
+                .antMatchers("/devtest/**").permitAll()
                 // 附件下载支持预签名（不强制 token，由预签名 URL 自身控制）
                 .antMatchers(HttpMethod.GET, "/attachment/download/**").permitAll()
                 // 其余全部需要认证

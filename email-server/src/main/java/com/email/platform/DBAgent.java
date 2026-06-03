@@ -88,39 +88,102 @@ public class DBAgent {
     // ==================== save / update / delete ====================
 
     public static void save(Object entity) {
-        getSession().save(entity);
+        Session s = getSession();
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            s.save(entity);
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public static void update(Object entity) {
-        getSession().update(entity);
+        Session s = getSession();
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            s.update(entity);
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public static void delete(Object entity) {
-        getSession().delete(entity);
+        Session s = getSession();
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            s.delete(entity);
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
     }
 
     public static void saveAll(Collection<?> entities) {
         Session s = getSession();
-        int i = 0;
-        for (Object e : entities) {
-            s.save(e);
-            if (++i % 20 == 0) { s.flush(); s.clear(); }
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            int i = 0;
+            for (Object e : entities) {
+                s.save(e);
+                if (++i % 20 == 0) { s.flush(); s.clear(); }
+            }
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
         }
     }
 
     public static void updateAll(Collection<?> entities) {
         Session s = getSession();
-        int i = 0;
-        for (Object e : entities) {
-            s.update(e);
-            if (++i % 20 == 0) { s.flush(); s.clear(); }
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            int i = 0;
+            for (Object e : entities) {
+                s.update(e);
+                if (++i % 20 == 0) { s.flush(); s.clear(); }
+            }
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
         }
     }
 
     public static void deleteAll(Collection<?> entities) {
         Session s = getSession();
-        for (Object e : entities) {
-            s.delete(e);
+        Transaction tx = null;
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            tx = s.beginTransaction();
+        }
+        try {
+            for (Object e : entities) {
+                s.delete(e);
+            }
+            if (tx != null) tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
         }
     }
 
@@ -164,19 +227,22 @@ public class DBAgent {
      */
     private static String buildCountHql(String hql) {
         String upper = hql.toUpperCase().trim();
-        // 去掉 SELECT ... FROM 之前的部分
         String result = hql;
+        // SELECT ... FROM → SELECT COUNT(*) FROM
         if (upper.startsWith("SELECT")) {
-            int fromIdx = upper.indexOf("FROM");
+            int fromIdx = upper.indexOf(" FROM ");
             if (fromIdx > 0) {
                 result = hql.substring(fromIdx);
             }
         }
+        // 如果还是以 FROM 开头，去掉前导空白
+        result = result.trim();
         // 去掉 ORDER BY
         int orderIdx = result.toUpperCase().lastIndexOf("ORDER BY");
         if (orderIdx > 0) {
             result = result.substring(0, orderIdx);
         }
+        // 去掉 FETCH（如果存在）
         return "SELECT COUNT(*) " + result;
     }
 }
