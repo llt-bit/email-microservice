@@ -62,11 +62,12 @@ email:
     # cron: 每5分钟增量同步
     cron: "0 */5 * * * ?"
     # OA 数据库连接（只读，用于同步组织架构）
+    # 配置了 OA_DB_URL 环境变量时才激活，否则跳过 OA 同步
     oa-datasource:
       driver-class-name: oracle.jdbc.OracleDriver
-      url: ${OA_DB_URL:jdbc:oracle:thin:@127.0.0.1:1521:orcl}
-      username: ${OA_DB_USER:seeyon}
-      password: ${OA_DB_PASSWORD:seeyon}
+      url: ${OA_DB_URL:}
+      username: ${OA_DB_USER:}
+      password: ${OA_DB_PASSWORD:}
   # AI 配置（通义千问 / DashScope API）
   ai:
     api-url: ${AI_API_URL:https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions}
@@ -94,8 +95,4 @@ logging:
   file:
     name: logs/email-server.log
 
-# Knife4j API 文档
-knife4j:
-  enable: true
-  setting:
-    language: zh_cn
+# API 文档: 稍后按需添加 Knife4j

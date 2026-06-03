@@ -4,8 +4,6 @@ import com.email.common.R;
 import com.email.entity.EmailFolder;
 import com.email.security.UserContextHolder;
 import com.email.service.FolderService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -17,19 +15,16 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/folder")
-@Tag(name = "邮件文件夹", description = "自定义文件夹CRUD及邮件移动")
 public class EmailFolderController {
 
     @Resource private FolderService folderService;
 
     @GetMapping("/list")
-    @Operation(summary = "获取文件夹列表")
     public R<List<EmailFolder>> list() {
         return R.ok(folderService.getFolders(UserContextHolder.getUserId()));
     }
 
     @PostMapping("/create")
-    @Operation(summary = "创建文件夹")
     public R<List<EmailFolder>> create(@RequestBody Map<String, String> params) {
         Long userId = UserContextHolder.getUserId();
         String fileName = params.get("fileName");
@@ -40,7 +35,6 @@ public class EmailFolderController {
     }
 
     @PostMapping("/update")
-    @Operation(summary = "重命名文件夹")
     public R<List<EmailFolder>> update(@RequestBody Map<String, String> params) {
         Long folderId = Long.parseLong(params.get("id"));
         String newName = params.get("fileName");
@@ -49,7 +43,6 @@ public class EmailFolderController {
     }
 
     @PostMapping("/delete")
-    @Operation(summary = "删除文件夹")
     public R<List<EmailFolder>> delete(@RequestBody Map<String, String> params) {
         Long folderId = Long.parseLong(params.get("id"));
         folderService.delete(folderId);
@@ -57,7 +50,6 @@ public class EmailFolderController {
     }
 
     @PostMapping("/move")
-    @Operation(summary = "移动邮件到文件夹")
     public R<Void> move(@RequestBody Map<String, Object> params) {
         @SuppressWarnings("unchecked")
         List<Integer> affairIdInts = (List<Integer>) params.get("affairIds");
@@ -68,7 +60,6 @@ public class EmailFolderController {
     }
 
     @PostMapping("/rule")
-    @Operation(summary = "更新文件夹过滤规则")
     public R<Void> updateRule(@RequestBody Map<String, String> params) {
         Long folderId = Long.parseLong(params.get("id"));
         String rule = params.get("rule");
@@ -77,7 +68,6 @@ public class EmailFolderController {
     }
 
     @PostMapping("/applyRule")
-    @Operation(summary = "应用过滤规则到历史邮件")
     public R<Void> applyRule(@RequestBody Map<String, String> params) {
         Long folderId = Long.parseLong(params.get("id"));
         folderService.applyRuleToHistory(folderId);

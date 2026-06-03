@@ -31,7 +31,8 @@ public class OrgServiceImpl implements OrgService {
     @Resource private OrgTeamMemberMapper orgTeamMemberMapper;
 
     /** OA 数据源（只读），配置在 application.yml */
-    @Resource(name = "oaDataSource")
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    @org.springframework.beans.factory.annotation.Qualifier("oaDataSource")
     private DataSource oaDataSource;
 
     @Override

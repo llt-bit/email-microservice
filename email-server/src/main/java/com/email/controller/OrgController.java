@@ -4,8 +4,6 @@ import com.email.common.R;
 import com.email.entity.OrgDepartment;
 import com.email.entity.OrgMember;
 import com.email.service.OrgService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +16,11 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/org")
-@Tag(name = "组织架构", description = "人员/部门/单位查询（写信选人）")
 public class OrgController {
 
     @Resource private OrgService orgService;
 
     @PostMapping("/searchMember")
-    @Operation(summary = "搜索人员（写邮件选人）")
     public R<List<Map<String, Object>>> searchMember(@RequestBody Map<String, String> params) {
         String keyword = params.getOrDefault("keyword", "");
         int limit = Integer.parseInt(params.getOrDefault("limit", "50"));
@@ -45,13 +41,11 @@ public class OrgController {
     }
 
     @GetMapping("/member/{id}")
-    @Operation(summary = "查询人员详情")
     public R<OrgMember> getMember(@PathVariable Long id) {
         return R.ok(orgService.getMemberById(id));
     }
 
     @GetMapping("/department/members/{departmentId}")
-    @Operation(summary = "查询部门下的人员")
     public R<List<Map<String, Object>>> getDepartmentMembers(@PathVariable Long departmentId) {
         List<OrgMember> members = orgService.getMembersByDepartmentId(departmentId);
         List<Map<String, Object>> list = new ArrayList<>();
@@ -68,19 +62,16 @@ public class OrgController {
     }
 
     @GetMapping("/departments")
-    @Operation(summary = "查询部门列表")
     public R<List<OrgDepartment>> getDepartments(@RequestParam(required = false) Long accountId) {
         return R.ok(orgService.getDepartments(accountId));
     }
 
     @GetMapping("/entity/{type}/{id}")
-    @Operation(summary = "查询实体详情（Member/Department/Account/Team）")
     public R<Map<String, Object>> getEntity(@PathVariable String type, @PathVariable Long id) {
         return R.ok(orgService.getEntityDetail(type, id));
     }
 
     @PostMapping("/groupMembers")
-    @Operation(summary = "获取群组/部门成员展开列表")
     public R<List<Map<String, Object>>> getGroupMembers(@RequestBody Map<String, Object> params) {
         String entityId = (String) params.get("entityId");
         if (entityId == null) return R.ok(Collections.emptyList());

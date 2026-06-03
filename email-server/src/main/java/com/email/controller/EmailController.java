@@ -7,8 +7,6 @@ import com.email.entity.EmailSummary;
 import com.email.security.UserContextHolder;
 import com.email.service.AttachmentService;
 import com.email.service.EmailService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +21,6 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/email")
-@Tag(name = "邮件核心", description = "邮件的发送、列表、详情、操作")
 public class EmailController {
 
     @Resource private EmailService emailService;
@@ -32,7 +29,6 @@ public class EmailController {
     // ==================== 列表 ====================
 
     @PostMapping("/list")
-    @Operation(summary = "获取邮件列表（收件箱/发件箱/草稿/删除/收藏/加密/自定义文件夹）")
     public R<PageResult<EmailAffair>> list(@RequestBody Map<String, Object> params) {
         Long userId = UserContextHolder.getUserId();
         String type = (String) params.get("type");
@@ -84,7 +80,6 @@ public class EmailController {
     // ==================== 详情 ====================
 
     @GetMapping("/content/{affairId}")
-    @Operation(summary = "获取邮件详情")
     public R<Map<String, Object>> getContent(@PathVariable Long affairId) {
         EmailAffair affair = emailService.getAffairById(affairId);
         if (affair == null) {
@@ -134,7 +129,6 @@ public class EmailController {
     // ==================== 发送/保存 ====================
 
     @PostMapping("/send")
-    @Operation(summary = "发送邮件或保存草稿")
     public R<Map<String, Object>> sendEmail(@RequestBody Map<String, Object> params) {
         String type = (String) params.getOrDefault("type", "send");
 
@@ -155,7 +149,6 @@ public class EmailController {
     // ==================== 操作 ====================
 
     @PostMapping("/delete")
-    @Operation(summary = "删除邮件")
     public R<Void> deleteMail(@RequestBody Map<String, String> params) {
         String affairId = params.get("affairId");
         String type = params.get("type");
@@ -168,7 +161,6 @@ public class EmailController {
     }
 
     @PostMapping("/recall")
-    @Operation(summary = "撤销已发送邮件")
     public R<String> recallMail(@RequestBody Map<String, String> params) {
         String affairIds = params.get("affairIds");
         if (affairIds == null) return R.fail("参数缺失");
@@ -182,7 +174,6 @@ public class EmailController {
     }
 
     @PostMapping("/recovery")
-    @Operation(summary = "恢复已删除邮件")
     public R<Void> recovery(@RequestBody Map<String, String> params) {
         String affairIds = params.get("affairIds");
         if (affairIds == null) return R.fail("参数缺失");
@@ -192,7 +183,6 @@ public class EmailController {
     }
 
     @PostMapping("/mark")
-    @Operation(summary = "标记操作（已办/收藏/加密）")
     public R<String> mark(@RequestBody Map<String, String> params) {
         String affairId = params.get("affairId");
         String flagType = params.get("flagType");
@@ -203,7 +193,6 @@ public class EmailController {
     }
 
     @PostMapping("/tagUnRead")
-    @Operation(summary = "标记未读")
     public R<Void> tagUnRead(@RequestBody Map<String, String> params) {
         String affairId = params.get("affairId");
         if (affairId == null) return R.fail("参数缺失");
@@ -215,7 +204,6 @@ public class EmailController {
     // ==================== 数量 ====================
 
     @GetMapping("/counts")
-    @Operation(summary = "获取各文件夹邮件数量")
     public R<Map<String, Object>> counts() {
         Long userId = UserContextHolder.getUserId();
         Map<String, Integer> counts = emailService.countGroupByState(userId);
@@ -233,25 +221,21 @@ public class EmailController {
     // ==================== 回复/转发/编辑 ====================
 
     @PostMapping("/reply")
-    @Operation(summary = "获取回复数据")
     public R<Map<String, Object>> reply(@RequestBody Map<String, Object> params) {
         return R.ok(emailService.getReplyData(params));
     }
 
     @PostMapping("/allReply")
-    @Operation(summary = "获取全部回复数据")
     public R<Map<String, Object>> allReply(@RequestBody Map<String, Object> params) {
         return R.ok(emailService.getAllReplyData(params));
     }
 
     @PostMapping("/forward")
-    @Operation(summary = "获取转发数据")
     public R<Map<String, Object>> forward(@RequestBody Map<String, Object> params) {
         return R.ok(emailService.getForwardData(params));
     }
 
     @PostMapping("/compile")
-    @Operation(summary = "获取编辑/草稿数据")
     public R<Map<String, Object>> compile(@RequestBody Map<String, Object> params) {
         return R.ok(emailService.getInternalCompileData(params));
     }
@@ -259,7 +243,6 @@ public class EmailController {
     // ==================== 回执/导出 ====================
 
     @PostMapping("/checkStatus")
-    @Operation(summary = "查看邮件回执（阅读状态）")
     public R<List<Map<String, Object>>> checkStatus(@RequestBody Map<String, String> params) {
         String summaryId = params.get("summaryId");
         String affairId = params.get("affairId");
@@ -289,7 +272,6 @@ public class EmailController {
     }
 
     @PostMapping("/export")
-    @Operation(summary = "导出邮件为 EML")
     public R<Map<String, String>> exportEmail(@RequestBody Map<String, String> params) {
         // EML 导出需要额外处理，暂返回附件下载信息
         return R.fail("导出功能开发中");
@@ -298,7 +280,6 @@ public class EmailController {
     // ==================== 搜索人员 ====================
 
     @PostMapping("/searchMember")
-    @Operation(summary = "搜索人员（写邮件选人）")
     public R<List<Map<String, Object>>> searchMember(@RequestBody Map<String, String> params) {
         String keyword = params.get("keyword");
         if (keyword == null || keyword.length() < 1) return R.ok(Collections.emptyList());
@@ -310,7 +291,6 @@ public class EmailController {
     // ==================== 辅助 ====================
 
     @DeleteMapping("/cancelAutosave")
-    @Operation(summary = "取消自动保存的草稿")
     public R<Void> cancelAutosave(@RequestParam String firstAutosaveTime,
                                   @RequestParam String oldAffairId) {
         Map<String, Object> params = new HashMap<>();

@@ -1,24 +1,20 @@
 package com.email.config;
 
 import com.zaxxer.hikari.HikariDataSource;
-import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
 /**
  * OA 数据库只读数据源（用于同步组织架构）。
- *
- * <p>仅在 {@code email.org-sync.enabled=true} 时激活。</p>
+ * 仅在配置了 OA 数据库连接信息时激活。
  */
-@Data
 @Configuration
 @ConfigurationProperties(prefix = "email.org-sync.oa-datasource")
-@ConditionalOnProperty(name = "email.org-sync.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnExpression("!'${email.org-sync.oa-datasource.url:}'.isEmpty()")
 public class OaDataSourceConfig {
 
     private String driverClassName = "oracle.jdbc.OracleDriver";
@@ -26,10 +22,11 @@ public class OaDataSourceConfig {
     private String username;
     private String password;
 
-    /**
-     * OA 只读数据源（仅用于同步组织架构）。
-     * 命名为 "oaDataSource"，便于 OrgService 注入。
-     */
+    public void setDriverClassName(String v) { this.driverClassName = v; }
+    public void setUrl(String v) { this.url = v; }
+    public void setUsername(String v) { this.username = v; }
+    public void setPassword(String v) { this.password = v; }
+
     @Bean(name = "oaDataSource")
     public DataSource oaDataSource() {
         HikariDataSource ds = new HikariDataSource();
@@ -43,17 +40,5 @@ public class OaDataSourceConfig {
         ds.setIdleTimeout(300000);
         ds.setPoolName("OADataSource");
         return ds;
-    }
-
-    /**
-     * 邮件业务主数据源。
-     * Spring Boot 自动配置，这里仅在存在 OA 数据源时保留 @Primary。
-     */
-    @Primary
-    @Bean(name = "emailDataSource")
-    @ConditionalOnProperty(name = "email.org-sync.enabled", havingValue = "false")
-    public DataSource emailDataSource() {
-        // 让 Spring Boot 自动配置处理，这里只是占位
-        return null;
     }
 }

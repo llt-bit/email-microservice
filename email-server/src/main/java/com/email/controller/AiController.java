@@ -5,8 +5,6 @@ import com.email.service.AiService;
 import com.email.service.AiService.AiResponse;
 import com.email.service.AiService.Capability;
 import com.email.service.AiService.StreamCallback;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +25,11 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/ai")
-@Tag(name = "AI助手", description = "智能回复、邮件总结、待办提取、润色翻译（SSE流式）")
 public class AiController {
 
     @Resource private AiService aiService;
 
     @PostMapping(value = "/agent", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "AI智能体统一入口（SSE流式）")
     public SseEmitter agent(@RequestParam String capability,
                              @RequestParam(required = false) String subject,
                              @RequestParam(required = false) String content,

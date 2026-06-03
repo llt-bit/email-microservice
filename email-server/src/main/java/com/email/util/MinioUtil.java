@@ -40,7 +40,7 @@ public class MinioUtil {
                 log.info("MinIO bucket [{}] 创建成功", config.getBucket());
             }
         } catch (Exception e) {
-            log.error("MinIO bucket 初始化失败", e);
+            log.warn("MinIO 不可用（附件功能暂不可用）: {}", e.getMessage());
         }
     }
 

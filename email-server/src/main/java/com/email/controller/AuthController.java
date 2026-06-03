@@ -6,8 +6,6 @@ import com.email.mapper.OrgMemberMapper;
 import com.email.security.JwtTokenProvider;
 import com.email.security.UserContext;
 import com.email.security.UserContextHolder;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +23,12 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "认证", description = "登录、Token刷新")
 public class AuthController {
 
     @Resource private JwtTokenProvider jwtTokenProvider;
     @Resource private OrgMemberMapper orgMemberMapper;
 
     @PostMapping("/login")
-    @Operation(summary = "用户名密码登录")
     public R<Map<String, Object>> login(@RequestBody Map<String, String> params) {
         String loginName = params.get("loginName");
         String password = params.get("password");
@@ -75,7 +71,6 @@ public class AuthController {
     }
 
     @PostMapping("/sso/verify")
-    @Operation(summary = "OA SSO Token 验证（OA 跳转时调用）")
     public R<Map<String, Object>> ssoVerify(@RequestParam("token") String token) {
         // 已在 Filter 层完成验证并设置 UserContext
         UserContext ctx = UserContextHolder.get();
@@ -88,7 +83,6 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "刷新 Token")
     public R<Map<String, Object>> refresh() {
         UserContext ctx = UserContextHolder.get();
         String newToken = jwtTokenProvider.generateToken(ctx);
@@ -99,7 +93,6 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "获取当前登录用户信息")
     public R<Map<String, Object>> me() {
         UserContext ctx = UserContextHolder.get();
         Map<String, Object> result = new HashMap<>();

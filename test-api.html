@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>邮件微服务 - API 测试</title>
+<style>
+body { font-family: 'Microsoft YaHei', sans-serif; max-width: 900px; margin: 20px auto; padding: 0 20px; background: #f5f5f5; }
+h2 { color: #333; border-bottom: 2px solid #409EFF; padding-bottom: 8px; }
+.card { background: #fff; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+input, textarea, button, select { padding: 8px 12px; margin: 4px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 14px; }
+button { background: #409EFF; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+button:hover { background: #337ecc; }
+button:disabled { background: #a0cfff; cursor: not-allowed; }
+textarea { width: 100%; height: 80px; font-family: monospace; }
+label { font-weight: bold; margin-right: 6px; color: #606266; }
+.result { background: #fafafa; border: 1px solid #e4e7ed; border-radius: 4px; padding: 12px; max-height: 300px; overflow: auto; white-space: pre-wrap; font-size: 12px; font-family: Consolas, monospace; }
+.token-box { word-break: break-all; font-size: 11px; color: #67c23a; background: #f0f9eb; padding: 8px; border-radius: 4px; margin: 8px 0; }
+.status { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; color: #fff; }
+.status-ok { background: #67c23a; }
+.status-err { background: #f56c6c; }
+.row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<h1>📧 邮件微服务 API 测试面板</h1>
+<p>服务地址: <strong>http://localhost:8080/api</strong> &nbsp;|&nbsp; 状态: <span id="statusBadge" class="status status-ok">运行中</span></p>
+
+<!-- 1. 登录 -->
+<div class="card">
+  <h2>1. 登录</h2>
+  <div class="row">
+    <label>用户名:</label><input id="loginName" value="admin" style="width:120px">
+    <label>密码:</label><input id="password" value="admin" type="password" style="width:120px">
+    <button onclick="login()">登录</button>
+  </div>
+  <div id="tokenBox" class="token-box" style="display:none"></div>
+</div>
+
+<!-- 2. 邮件数量 -->
+<div class="card">
+  <h2>2. 邮件数量</h2>
+  <button onclick="getCounts()">获取数量</button>
+  <div id="countsResult" class="result" style="display:none"></div>
+</div>
+
+<!-- 3. 列表查询 -->
+<div class="card">
+  <h2>3. 邮件列表</h2>
+  <div class="row">
+    <label>文件夹:</label>
+    <select id="listType">
+      <option value="inBox">收件箱</option>
+      <option value="sent">发件箱</option>
+      <option value="draft">草稿箱</option>
+      <option value="delete">已删除</option>
+      <option value="collection">收藏</option>
+      <option value="encryption">加密箱</option>
+    </select>
+    <label>页码:</label><input id="pageNo" value="1" style="width:50px">
+    <label>每页:</label><input id="pageSize" value="5" style="width:50px">
+    <button onclick="getList()">查询</button>
+  </div>
+  <div id="listResult" class="result" style="display:none"></div>
+</div>
+
+<!-- 4. 发邮件 -->
+<div class="card">
+  <h2>4. 发送邮件</h2>
+  <div class="row">
+    <label>主题:</label><input id="mailSubject" value="测试邮件" style="width:300px"><br>
+    <label>正文:</label><textarea id="mailContent">&lt;p&gt;这是测试正文&lt;/p&gt;</textarea><br>
+    <label>收件人ID:</label><input id="mailReceivers" value="Member|1" style="width:150px">
+    <label>收件人名:</label><input id="mailReceiversStr" value="管理员" style="width:150px"><br>
+    <button onclick="sendMail('send')">发送</button>
+    <button onclick="sendMail('draft')">存草稿</button>
+  </div>
+  <div id="sendResult" class="result" style="display:none"></div>
+</div>
+
+<!-- 5. 自定义请求 -->
+<div class="card">
+  <h2>5. 自定义请求</h2>
+  <div class="row">
+    <label>方法:</label>
+    <select id="customMethod"><option>GET</option><option selected>POST</option></select>
+    <label>路径:</label><input id="customPath" value="/email/counts" style="width:200px">
+    <label>Body(JSON):</label><input id="customBody" value='{"type":"inBox"}' style="width:300px">
+    <button onclick="customRequest()">发送</button>
+  </div>
+  <div id="customResult" class="result" style="display:none"></div>
+</div>
+
+<script>
+const BASE = 'http://localhost:8080/api';
+let TOKEN = '';
+
+// 从 localStorage 恢复
+TOKEN = localStorage.getItem('email_token') || '';
+if (TOKEN) {
+  document.getElementById('tokenBox').style.display = 'block';
+  document.getElementById('tokenBox').innerText = 'Token: ' + TOKEN.substring(0, 60) + '...';
+}
+
+function hdr() {
+  return TOKEN ? { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+
+async function login() {
+  const name = document.getElementById('loginName').value;
+  const pwd = document.getElementById('password').value;
+  try {
+    const res = await fetch(BASE + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ loginName: name, password: pwd }) });
+    const data = await res.json();
+    if (data.success && data.data && data.data.token) {
+      TOKEN = data.data.token;
+      localStorage.setItem('email_token', TOKEN);
+      document.getElementById('tokenBox').style.display = 'block';
+      document.getElementById('tokenBox').innerText = '✅ 登录成功！Token: ' + TOKEN.substring(0, 80) + '...';
+      document.getElementById('statusBadge').className = 'status status-ok';
+      document.getElementById('statusBadge').innerText = '已登录';
+    } else {
+      document.getElementById('tokenBox').style.display = 'block';
+      document.getElementById('tokenBox').innerText = '❌ 登录失败: ' + JSON.stringify(data);
+    }
+  } catch (e) {
+    document.getElementById('tokenBox').style.display = 'block';
+    document.getElementById('tokenBox').innerText = '❌ 网络错误: ' + e.message;
+  }
+}
+
+async function getCounts() {
+  const div = document.getElementById('countsResult');
+  try {
+    const res = await fetch(BASE + '/email/counts', { headers: hdr() });
+    const data = await res.json();
+    div.style.display = 'block';
+    div.innerHTML = JSON.stringify(data, null, 2);
+  } catch (e) { div.style.display = 'block'; div.innerHTML = '错误: ' + e.message; }
+}
+
+async function getList() {
+  const div = document.getElementById('listResult');
+  const body = JSON.stringify({
+    type: document.getElementById('listType').value,
+    pageNo: parseInt(document.getElementById('pageNo').value),
+    pageSize: parseInt(document.getElementById('pageSize').value)
+  });
+  try {
+    const res = await fetch(BASE + '/email/list', { method: 'POST', headers: hdr(), body });
+    const data = await res.json();
+    div.style.display = 'block';
+    div.innerHTML = JSON.stringify(data, null, 2);
+  } catch (e) { div.style.display = 'block'; div.innerHTML = '错误: ' + e.message; }
+}
+
+async function sendMail(type) {
+  const div = document.getElementById('sendResult');
+  const body = JSON.stringify({
+    subject: document.getElementById('mailSubject').value,
+    content: document.getElementById('mailContent').value,
+    receivers: document.getElementById('mailReceivers').value,
+    receiversStr: document.getElementById('mailReceiversStr').value,
+    type: type
+  });
+  try {
+    const res = await fetch(BASE + '/email/send', { method: 'POST', headers: hdr(), body });
+    const data = await res.json();
+    div.style.display = 'block';
+    div.innerHTML = JSON.stringify(data, null, 2);
+  } catch (e) { div.style.display = 'block'; div.innerHTML = '错误: ' + e.message; }
+}
+
+async function customRequest() {
+  const div = document.getElementById('customResult');
+  const method = document.getElementById('customMethod').value;
+  const path = document.getElementById('customPath').value;
+  const body = document.getElementById('customBody').value;
+  try {
+    const opts = { method, headers: hdr() };
+    if (method === 'POST' && body) opts.body = body;
+    const res = await fetch(BASE + path, opts);
+    const data = await res.json();
+    div.style.display = 'block';
+    div.innerHTML = JSON.stringify(data, null, 2);
+  } catch (e) { div.style.display = 'block'; div.innerHTML = '错误: ' + e.message; }
+}
+</script>
+</body>
+</html>
