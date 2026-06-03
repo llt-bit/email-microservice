@@ -1,0 +1,95 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  tomcat:
+    # SSE 流式输出需要较长的连接保持时间
+    connection-timeout: 120000
+    max-http-form-post-size: 100MB
+  # 附件上传大小限制
+spring:
+  application:
+    name: email-server
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=10m
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.email.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: assign_id          # 雪花算法生成主键（兼容 OA 的 Long 型 ID）
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# JWT 配置
+email:
+  jwt:
+    # 生产环境务必通过环境变量覆盖：EMAIL_JWT_SECRET
+    secret: ${EMAIL_JWT_SECRET:ZmDefaultEmailSecretKeyChangeMeInProductionEnv2026}
+    # token 有效期（毫秒），默认 8 小时
+    expiration: 28800000
+    # 与 OA 单点登录共享的密钥（OA 生成 token 用此密钥签名）
+    sso-secret: ${EMAIL_SSO_SECRET:ZmDefaultSsoSharedSecretChangeMe2026}
+  # MinIO 配置
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    bucket: email-attachments
+    # 预签名 URL 有效期（秒）
+    presign-expiry: 900
+  # 组织架构同步配置
+  org-sync:
+    enabled: ${ORG_SYNC_ENABLED:true}
+    # cron: 每5分钟增量同步
+    cron: "0 */5 * * * ?"
+    # OA 数据库连接（只读，用于同步组织架构）
+    oa-datasource:
+      driver-class-name: oracle.jdbc.OracleDriver
+      url: ${OA_DB_URL:jdbc:oracle:thin:@127.0.0.1:1521:orcl}
+      username: ${OA_DB_USER:seeyon}
+      password: ${OA_DB_PASSWORD:seeyon}
+  # 业务开关
+  feature:
+    # 是否启用跨网邮件功能（独立部署后一般关闭）
+    kuawang-enabled: false
+    # 是否启用密级审批
+    secret-approval-enabled: true
+    # 邮件正文是否加密存储（DES）
+    content-encrypt-enabled: false
+
+# 邮件正文 DES 加密密钥（迁移自 OA 的 internalmail.mailKey）
+internalmail:
+  mailKey: ${MAIL_DES_KEY:seeyon@inmail}
+
+# 日志
+logging:
+  level:
+    com.email: debug
+    com.email.mapper: debug
+  file:
+    name: logs/email-server.log
+
+# Knife4j API 文档
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn

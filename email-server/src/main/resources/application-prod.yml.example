@@ -1,0 +1,24 @@
+# ============ 生产环境（内网 人大金仓 KingbaseES V8R6） ============
+# KingbaseES 兼容 PostgreSQL，使用金仓官方 JDBC 驱动 kingbase8
+spring:
+  datasource:
+    driver-class-name: com.kingbase8.Driver
+    # 金仓连接串格式：jdbc:kingbase8://host:port/database
+    # 默认端口 54321，schema 默认与数据库名一致或 public
+    url: jdbc:kingbase8://${DB_HOST:127.0.0.1}:${DB_PORT:54321}/${DB_NAME:email_db}?currentSchema=public
+    username: ${DB_USER:system}
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 30
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      # 金仓连接保活检测
+      connection-test-query: SELECT 1
+
+# 生产日志级别调低
+logging:
+  level:
+    com.email: info
+    com.email.mapper: warn
