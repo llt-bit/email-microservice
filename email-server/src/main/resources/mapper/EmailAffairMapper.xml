@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.email.mapper.EmailAffairMapper">
+
+    <!-- ============================================================
+         邮件列表查询 SQL（从 OA HQL/NamedQuery 迁移为 MyBatis 动态 SQL）
+         ============================================================
+
+    <!-- 通用返回值映射 -->
+    <resultMap id="BaseResultMap" type="com.email.entity.EmailAffair">
+        <id column="id" property="id"/>
+        <result column="summary_id" property="summaryId"/>
+        <result column="member_id" property="memberId"/>
+        <result column="member_name" property="memberName"/>
+        <result column="sender_id" property="senderId"/>
+        <result column="sender_name" property="senderName"/>
+        <result column="subject" property="subject"/>
+        <result column="state" property="state"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="delete_state" property="deleteState"/>
+        <result column="read_flag" property="readFlag"/>
+        <result column="browse_time" property="browseTime"/>
+        <result column="is_handled" property="isHandled"/>
+        <result column="collect" property="collect"/>
+        <result column="attachments_flag" property="attachmentsFlag"/>
+        <result column="affair_size" property="affairSize"/>
+        <result column="is_forward" property="isForward"/>
+        <result column="is_reply" property="isReply"/>
+        <result column="reply_type" property="replyType"/>
+        <result column="pass_the_audit" property="passTheAudit"/>
+        <result column="path" property="path"/>
+        <result column="org_department_id" property="orgDepartmentId"/>
+        <result column="org_account_id" property="orgAccountId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="forward_member" property="forwardMember"/>
+    </resultMap>
+
+    <!-- ==================== 通用查询条件片段 ==================== -->
+
+    <!-- 模糊搜索条件（全文搜索/高级搜索） -->
+    <sql id="searchConditions">
+        <if test="params.subject != null and params.subject != ''">
+            AND ea.subject LIKE CONCAT('%', #{params.subject}, '%')
+        </if>
+        <if test="params.senderName != null and params.senderName != ''">
+            AND ea.sender_name LIKE CONCAT('%', #{params.senderName}, '%')
+        </if>
+        <if test="params.sendtoName != null and params.sendtoName != ''">
+            AND es.send_to LIKE CONCAT('%', #{params.sendtoName}, '%')
+        </if>
+        <if test="params.copytoName != null and params.copytoName != ''">
+            AND es.copy_to LIKE CONCAT('%', #{params.copytoName}, '%')
+        </if>
+        <if test="params.contentName != null and params.contentName != ''">
+            AND es.summary_content LIKE CONCAT('%', #{params.contentName}, '%')
+        </if>
+        <if test="params.attachName != null and params.attachName != ''">
+            AND es.attachments LIKE CONCAT('%', #{params.attachName}, '%')
+        </if>
+        <if test="params.createDate != null and params.createDate != ''">
+            AND DATE(ea.create_time) >= #{params.createDate}
+        </if>
+    </sql>
+
+    <!-- 排序条件 -->
+    <sql id="orderBy">
+        <choose>
+            <when test="params.orderType == 'dept'">
+                ORDER BY ea.org_department_id ${params.orderRule}
+            </when>
+            <when test="params.orderType == 'name'">
+                ORDER BY ea.sender_name ${params.orderRule}
+            </when>
+            <otherwise>
+                ORDER BY ea.create_time ${params.orderRule}
+            </otherwise>
+        </choose>
+    </sql>
+
+
+    <!-- ==================== 收件箱 ==================== -->
+
+    <select id="findInbox" resultMap="BaseResultMap">
+        SELECT ea.*, es.sender_id as s_sender_id, es.send_to, es.copy_to,
+               es.attachments_flag as s_attach, es.summary_size as s_size
+        FROM email_affair ea
+        JOIN email_summary es ON ea.summary_id = es.id
+        WHERE ea.member_id = #{userId}
+          AND ea.state IN (0, 2)              <!-- 收件箱 -->
+          AND ea.is_delete = 0
+          <!-- 已读/未读 -->
+          <if test="params.readType == 'notRead'">
+              AND ea.read_flag = 0
+          </if>
+          <if test="params.readType == 'Handled'">
+              AND ea.is_handled = 1
+          </if>
+          <if test="params.readType == 'NotHandled'">
+              AND ea.is_handled = 0
+          </if>
+          <!-- 全文搜索 -->
+          <include refid="searchConditions"/>
+          <!-- 分组(去重，取每个分组最新一条) -->
+          <if test="params.groupType != null and params.groupType != 'all'">
+              -- 分组模式下在内存中处理
+          </if>
+        <include refid="orderBy"/>
+    </select>
+
+
+    <!-- ==================== 发件箱 ==================== -->
+
+    <select id="findSent" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        WHERE ea.sender_id = #{userId}
+          AND ea.state = 2                      <!-- 已发送 -->
+          AND ea.is_delete = 0
+          <!-- 发件人自己给自己的也在收件箱里，这里排除 -->
+          AND ea.member_id = #{userId}
+          <include refid="searchConditions"/>
+        <include refid="orderBy"/>
+    </select>
+
+
+    <!-- ==================== 草稿箱 ==================== -->
+
+    <select id="findDraft" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        WHERE ea.sender_id = #{userId}
+          AND ea.state = 1                      <!-- 草稿 -->
+          AND ea.is_delete = 0
+          AND ea.member_id = #{userId}
+          <if test="params.subject != null and params.subject != ''">
+              AND ea.subject LIKE CONCAT('%', #{params.subject}, '%')
+          </if>
+        ORDER BY ea.update_time DESC
+    </select>
+
+
+    <!-- ==================== 已删除 ==================== -->
+
+    <select id="findDeleted" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        WHERE ea.member_id = #{userId}
+          AND ea.state = 3                      <!-- 已删除 -->
+          AND ea.is_delete = 0
+          <if test="params.subject != null and params.subject != ''">
+              AND ea.subject LIKE CONCAT('%', #{params.subject}, '%')
+          </if>
+        ORDER BY ea.update_time DESC
+    </select>
+
+
+    <!-- ==================== 收藏 ==================== -->
+
+    <select id="findCollect" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        WHERE ea.member_id = #{userId}
+          AND ea.collect = 1
+          AND ea.state != 3                     <!-- 不在已删除中 -->
+          AND ea.is_delete = 0
+          <include refid="searchConditions"/>
+        <include refid="orderBy"/>
+    </select>
+
+
+    <!-- ==================== 加密箱 ==================== -->
+
+    <select id="findSecret" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        JOIN email_secret esec ON esec.member_id = #{params.userId}
+        WHERE ea.state = 5                      <!-- 加密箱 -->
+          AND ea.is_delete = 0
+          AND ea.member_id = #{params.userId}
+          <include refid="searchConditions"/>
+        <include refid="orderBy"/>
+    </select>
+
+
+    <!-- ==================== 自定义文件夹 ==================== -->
+
+    <select id="findByPath" resultMap="BaseResultMap">
+        SELECT ea.*
+        FROM email_affair ea
+        WHERE ea.member_id = #{userId}
+          AND ea.path = #{path}
+          AND ea.is_delete = 0
+          AND ea.state IN (0, 2)               <!-- 收件箱、发件箱 -->
+          <include refid="searchConditions"/>
+        <include refid="orderBy"/>
+    </select>
+
+
+    <!-- ==================== 聚合统计 ==================== -->
+
+    <select id="countGroupByState" resultType="java.util.HashMap">
+        SELECT
+            SUM(CASE WHEN ea.state IN (0,2) AND ea.is_delete = 0
+                     AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS inbox,
+            SUM(CASE WHEN ea.state = 1 AND ea.is_delete = 0
+                     AND ea.sender_id = #{userId} AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS draft,
+            SUM(CASE WHEN ea.state = 2 AND ea.is_delete = 0
+                     AND ea.sender_id = #{userId} AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS sent,
+            SUM(CASE WHEN ea.state = 3 AND ea.is_delete = 0
+                     AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS deleted,
+            SUM(CASE WHEN ea.collect = 1 AND ea.state != 3 AND ea.is_delete = 0
+                     AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS collect,
+            SUM(CASE WHEN ea.state = 5 AND ea.is_delete = 0
+                     AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS encryption
+        FROM email_affair ea
+        WHERE ea.member_id = #{userId}
+    </select>
+
+</mapper>
