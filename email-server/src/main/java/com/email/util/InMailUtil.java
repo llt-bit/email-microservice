@@ -2,10 +2,9 @@ package com.email.util;
 
 import com.email.entity.InMailAffair;
 import com.email.entity.InMailSummary;
-import com.email.entity.OrgDepartment;
-import com.email.entity.OrgMember;
-import com.email.mapper.OrgDepartmentMapper;
-import com.email.mapper.OrgMemberMapper;
+import com.email.platform.DBAgent;
+import com.email.platform.entity.OrgMember;
+import com.email.platform.entity.OrgUnit;
 import com.email.security.UserContextHolder;
 import com.email.security.UserInfo;
 
@@ -26,14 +25,7 @@ public class InMailUtil {
 
     private static final char[] hex = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-    // 延迟注入（非 Spring 管理的工具类通过 AppContextHolder 获取）
-    private static OrgMemberMapper orgMemberMapper;
-    private static OrgDepartmentMapper orgDepartmentMapper;
-
-    public static void setMappers(OrgMemberMapper m, OrgDepartmentMapper d) {
-        orgMemberMapper = m;
-        orgDepartmentMapper = d;
-    }
+    // DBAgent 已由 HibernateConfig 初始化 SessionFactory，静态方法可用
 
     public static String removeRpeat(String sendToIds) {
         if (sendToIds == null || sendToIds.isEmpty()) return sendToIds;
@@ -104,15 +96,14 @@ public class InMailUtil {
     public static String mailSignature() {
         try {
             UserInfo user = UserInfo.fromCurrentUser();
-            Long unitId = UserContextHolder.get().getAccountId();
             Long departmentId = user.getDepartmentId();
-            Long postId = user.getPostId();
-
-            OrgMember deptOrg = orgDepartmentMapper != null ? orgDepartmentMapper.selectById(departmentId) : null;
-            String unitName = ""; // TODO: 查 org_account 表
-            String deptName = deptOrg != null ? deptOrg.getName() : "";
-            String postName = ""; // 岗位名称
             String userName = user.getName();
+
+            // 查询部门名称
+            OrgUnit dept = DBAgent.get(OrgUnit.class, departmentId);
+            String deptName = dept != null ? dept.getName() : "";
+            String unitName = ""; // TODO: 查单位表
+            String postName = ""; // 岗位名称
 
             String content = "<br/><br/><br/><br/>";
             String star = "<p style='color:#1E9FFF;'>--------------------------------------------------------------------------------------------------------------------------</p><br/><br/>";

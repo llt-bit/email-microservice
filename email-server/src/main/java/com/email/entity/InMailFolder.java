@@ -1,33 +1,20 @@
 package com.email.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-
 import java.sql.Timestamp;
 
 /**
  * 自定义文件夹 PO —— 从 OA InMailFolder 直接复制。
+ * 使用 Hibernate hbm.xml 映射，不需要 MyBatis 注解。
  */
-@TableName("email_folder")
-public class InMailFolder extends BaseEntity {
+public class InMailFolder {
 
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
-
-    @TableField("member_id")
     private Long memberId;
     private String path;
     private String type;
-    @TableField("member_id")
-    private Long _memberId;
-    @TableField("is_delete")
     private Integer isDelete;
     private String rule;
-    @TableField("file_name")
     private String fileName;
-    @TableField("create_time")
     private Timestamp createDate;
 
     public Long getId() { return id; }

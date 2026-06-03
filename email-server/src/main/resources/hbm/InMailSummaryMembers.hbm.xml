@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.email.entity.InMailSummaryMembersPo" lazy="false" table="pro_inmail_summary_members">
+        <id name="id" type="long" column="ID" length="20">
+            <generator class="assigned" />
+        </id>
+        <property name="mailSummaryId" type="long" column="MAIL_SUMMARY_ID" />
+        <property name="memberId" type="long" column="MEMBER_ID" />
+        <property name="memberName" type="string" column="MEMBER_NAME" />
+        <property name="memberLoginName" type="string" column="MEMBER_LOGIN_NAME" />
+        <property name="type" type="string" column="TYPE" />
+        <property name="typeId" type="long" column="TYPE_ID" />
+        <property name="detail" type="string" column="DETAIL" />
+        <property name="accountId" type="long" column="ACCOUNT_ID" />
+        <property name="sort" type="integer" column="SORT" />
+    </class>
+</hibernate-mapping>

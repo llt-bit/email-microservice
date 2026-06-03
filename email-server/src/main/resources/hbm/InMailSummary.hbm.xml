@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.email.entity">
+    <class name="InMailSummary" table="pro_inmail_summary">
+        <id name="id" type="long" column="ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="subject" column="SUBJECT" type="string" not-null="false" length="255"/>
+        <property name="state" column="STATE" type="integer" not-null="false"/>
+        <property name="startMemberId" column="START_MEMBER_ID" type="long" not-null="false"/>
+        <property name="orgDepartmentId" column="ORG_DEPARTMENT_ID" type="long" not-null="false"/>
+        <property name="orgAccountId" column="ORG_ACCOUNT_ID" type="long" not-null="false"/>
+        <property name="createDate" column="CREATE_DATE" type="timestamp" not-null="false"/>
+        <property name="forwardMember" column="FORWARD_MEMBER" type="string" not-null="false" length="255"/>
+        <property name="forwardMemberId" column="FORWARD_MEMBER_ID" type="long" not-null="false"/>
+        <property name="parentformAffairid" column="PARENTFORM_AFFAIRID" type="long" not-null="false"/>
+        <property name="parentformSummaryid" column="PARENTFORM_SUMMARYID" type="long" not-null="false"/>
+        <property name="canForward" column="CAN_FORWARD" type="boolean" not-null="false"/>
+        <property name="attachmentsFlag" column="ATTACHMENTS_FLAG" type="boolean" not-null="false"/>
+        <property name="canEditAttachment" column="CAN_EDIT_ATTACHMENT" type="boolean" not-null="false"/>
+        <property name="sendTo" column="SEND_TO" type="string" not-null="false"/>
+        <property name="sendToIds" column="SEND_TO_IDS" type="string" not-null="false"/>
+        <property name="copyTo" column="COPY_TO" type="string" not-null="false"/>
+        <property name="copyToIds" column="COPY_TO_IDS" type="string" not-null="false"/>
+        <property name="content" column="SUMMARY_CONTENT" type="string" not-null="false"/>
+        <property name="size" type="long" column="SUMMARY_SIZE" not-null="false"/>
+        <property name="mark" column="MARK" type="string" not-null="false" length="255"/>
+        <property name="shortMsgContent" column="SHORTMSG_CONTENT" type="string" not-null="false"/>
+        <property name="replyMember" column="REPLY_MEMBER" type="string" not-null="false" length="255"/>
+        <property name="replyMemberId" column="REPLY_MEMBER_ID" type="long" not-null="false"/>
+        <property name="replyParentAffairid" column="REPLY_PARENT_AFFAIRID" type="long" not-null="false"/>
+        <property name="replyParentSummaryid" column="REPLY_PARENT_SUMMARYID" type="long" not-null="false"/>
+        <property name="kuaWang" column="KUA_WANG" type="boolean" not-null="false"/>
+        <property name="isCanExport" column="isCanExport" type="boolean" not-null="false"/>
+        <property name="timedTask" column="IS_TIMING" type="boolean" not-null="false"/>
+        <property name="timingDate" column="TIMING_Date" type="timestamp" not-null="false"/>
+        <property name="startDetail" column="START_DETAIL" type="string" not-null="false"/>
+        <property name="sendToDetail" column="SEND_TO_DETAIL" type="string" not-null="false"/>
+        <property name="copyToDetail" column="COPY_TO_DETAIL" type="string" not-null="false"/>
+        <property name="approver" column="APPROVER" type="string" not-null="false"/>
+        <property name="approverStr" column="APPROVERSTR" type="string" not-null="false"/>
+        <property name="autosave" column="AUTOSAVE" type="string" not-null="false"/>
+        <property name="firstAutosaveTime" column="FIRST_AUTOSAVE_TIME" type="timestamp" not-null="false"/>
+        <property name="ferrySource" column="FERRY_SOURCE" type="string" not-null="false"/>
+        <property name="complaintMemberId" column="COMPLAINT_MEMBER_ID" type="long" not-null="false"/>
+        <property name="attachments" column="ATTACHMENTS" type="string" not-null="false"/>
+    </class>
+</hibernate-mapping>

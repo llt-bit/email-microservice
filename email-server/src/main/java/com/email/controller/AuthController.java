@@ -1,8 +1,8 @@
 package com.email.controller;
 
 import com.email.common.R;
-import com.email.entity.OrgMember;
-import com.email.mapper.OrgMemberMapper;
+import com.email.platform.DBAgent;
+import com.email.platform.entity.OrgMember;
 import com.email.security.JwtTokenProvider;
 import com.email.security.UserContext;
 import com.email.security.UserContextHolder;
@@ -16,9 +16,8 @@ import java.util.Map;
 /**
  * 认证 API。
  *
- * <p>支持两种登录方式：
- * 1. 独立登录：用户输入OA用户名密码 → 调 OA 接口验证 → 签发 JWT
- * 2. SSO：OA 菜单点击时 OA 后端签发 JWT → 前端存储后调用 API（推荐）</p>
+ * <p>开发环境：admin/admin 直接登录。
+ * 生产环境：调 OA 接口验证密码后签发 JWT（或通过 OA SSO 跳转传入 token）。</p>
  */
 @Slf4j
 @RestController
@@ -26,7 +25,6 @@ import java.util.Map;
 public class AuthController {
 
     @Resource private JwtTokenProvider jwtTokenProvider;
-    @Resource private OrgMemberMapper orgMemberMapper;
 
     @PostMapping("/login")
     public R<Map<String, Object>> login(@RequestBody Map<String, String> params) {
@@ -37,14 +35,17 @@ public class AuthController {
             return R.fail("用户名或密码为空");
         }
 
-        // 在独立的邮件数据库中查找用户（需要先同步组织架构）
-        OrgMember member = orgMemberMapper.findByLoginName(loginName);
-        if (member == null) {
+        // Hibernate 按登录名查询用户
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("loginName", loginName);
+        java.util.List<?> result = DBAgent.find("FROM OrgMember WHERE loginName=:loginName AND enabled=1", queryParams);
+
+        if (result.isEmpty()) {
             return R.fail("用户不存在或未同步");
         }
+        OrgMember member = (OrgMember) result.get(0);
 
-        // 密码验证：开发环境用固定密码 admin，生产环境需调 OA 接口
-        // TODO: 生产环境中调 OA REST 接口或 LDAP 验证密码
+        // 开发环境：admin 密码为 "admin"
         if (!"admin".equals(password)) {
             return R.fail("用户名或密码错误");
         }
@@ -59,50 +60,37 @@ public class AuthController {
 
         String token = jwtTokenProvider.generateToken(ctx);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-        result.put("tokenType", "Bearer");
-        result.put("userId", member.getId());
-        result.put("loginName", member.getLoginName());
-        result.put("userName", member.getName());
-        result.put("departmentId", member.getDepartmentId());
-        result.put("accountId", member.getAccountId());
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("token", token);
+        resultMap.put("tokenType", "Bearer");
+        resultMap.put("userId", member.getId());
+        resultMap.put("loginName", member.getLoginName());
+        resultMap.put("userName", member.getName());
+        resultMap.put("departmentId", member.getDepartmentId());
+        resultMap.put("accountId", member.getAccountId());
 
-        return R.ok(result);
-    }
-
-    @PostMapping("/sso/verify")
-    public R<Map<String, Object>> ssoVerify(@RequestParam("token") String token) {
-        // 已在 Filter 层完成验证并设置 UserContext
-        UserContext ctx = UserContextHolder.get();
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("userId", ctx.getUserId());
-        result.put("loginName", ctx.getLoginName());
-        result.put("userName", ctx.getUserName());
-        return R.ok(result);
+        return R.ok(resultMap);
     }
 
     @PostMapping("/refresh")
     public R<Map<String, Object>> refresh() {
         UserContext ctx = UserContextHolder.get();
         String newToken = jwtTokenProvider.generateToken(ctx);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", newToken);
-        return R.ok(result);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("token", newToken);
+        return R.ok(resultMap);
     }
 
     @GetMapping("/me")
     public R<Map<String, Object>> me() {
         UserContext ctx = UserContextHolder.get();
-        Map<String, Object> result = new HashMap<>();
-        result.put("userId", ctx.getUserId());
-        result.put("loginName", ctx.getLoginName());
-        result.put("userName", ctx.getUserName());
-        result.put("departmentId", ctx.getDepartmentId());
-        result.put("accountId", ctx.getAccountId());
-        result.put("admin", ctx.isAdmin());
-        return R.ok(result);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("userId", ctx.getUserId());
+        resultMap.put("loginName", ctx.getLoginName());
+        resultMap.put("userName", ctx.getUserName());
+        resultMap.put("departmentId", ctx.getDepartmentId());
+        resultMap.put("accountId", ctx.getAccountId());
+        resultMap.put("admin", ctx.isAdmin());
+        return R.ok(resultMap);
     }
 }

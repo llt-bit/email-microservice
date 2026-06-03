@@ -71,15 +71,21 @@ public class EmailDESUtil {
     }
 
     /**
-     * 兼容原 OA 的便捷方法 —— 自动判断是否需要解密。
+     * 兼容原 OA 的静态方法调用 —— InMailUtil.makeInMailSummary 中调用。
      */
-    public static String getDecryptString(String content, String mailKey) {
-        if (content == null || content.isEmpty()) return content;
-        try {
-            EmailDESUtil util = new EmailDESUtil(mailKey);
-            return util.decrypt(content);
-        } catch (Exception e) {
-            return content;
-        }
+    public static String getEncryptString(String plainText) {
+        return EmailDESUtilHolder.INSTANCE.encrypt(plainText);
+    }
+
+    /**
+     * 兼容原 OA 的静态方法 —— 自动判断是否需要解密。
+     */
+    public static String getDecryptString(String content) {
+        return EmailDESUtilHolder.INSTANCE.decrypt(content);
+    }
+
+    /** 持有一个静态实例，用默认密钥 */
+    private static class EmailDESUtilHolder {
+        static final EmailDESUtil INSTANCE = new EmailDESUtil("seeyon@inmail");
     }
 }

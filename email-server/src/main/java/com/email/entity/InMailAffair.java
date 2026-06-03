@@ -1,72 +1,47 @@
 package com.email.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-
 import java.sql.Timestamp;
 import java.util.Date;
 
 /**
- * 邮件事务 PO —— 从 OA InMailAffair 直接复制。
- * 去掉 extends BasePO, CtpAffair 引用，其余完全一致。
+ * 邮件事务 PO —— 从 OA InMailAffair 直接复制，使用 Hibernate hbm.xml 映射。
  */
-@TableName("email_affair")
-public class InMailAffair extends BaseEntity {
+public class InMailAffair {
 
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
+    private Long memberId;
+    private Long senderId;
+    private String subject;
+    private Long objectId;
+    private Integer state;
+    private Boolean delete = false;
+    private Date createDate;
+    private Date updateDate;
+    private Long orgDepartmentId;
+    private Long orgAccountId;
+    private Boolean readFlag = false;
+    private Boolean attachmentsFlag = false;
+    private Long size = 0L;
+    private String forwardMember;
+    private Boolean isForward = false;
+    private Boolean isReply = false;
+    private Integer replyType;
+    private Timestamp browseTime;
 
-    private Long memberId;                              // 人员id
-    private Long senderId;                              // 发起者id
-    private String subject;                             // 标题
-    @TableField("summary_id")
-    private Long objectId;                              // 内部邮件主表id
-    private Integer state;                              // 状态
-    @TableField("is_delete")
-    private Boolean delete = false;                     // 是否删除
-    @TableField("create_time")
-    private Date createDate;                            // 创建日期
-    @TableField("update_time")
-    private Date updateDate;                            // 更新日期
-    private Long orgDepartmentId;                       // 部门ID
-    private Long orgAccountId;                          // 单位id
-    @TableField("read_flag")
-    private Boolean readFlag = false;                   // 已浏览
-    @TableField("attachments_flag")
-    private Boolean attachmentsFlag = false;            // 是否有附件
-    @TableField("affair_size")
-    private Long size = 0L;                             // 邮件大小
-    @TableField("forward_member")
-    private String forwardMember;                       // 转发人名称
-    @TableField("is_forward")
-    private Boolean isForward = false;                  // 是否已转发
-    @TableField("is_reply")
-    private Boolean isReply = false;                    // 是否已回复
-    private Integer replyType;                          // 回复类型
-    @TableField("browse_time")
-    private Timestamp browseTime;                       // 浏览时间
-
-    @TableField(exist = false)
     private String headImg;
-    @TableField(exist = false)
     private String secretNameStr;
-    @TableField(exist = false)
     private String secretIdStr;
-    @TableField(exist = false)
     private boolean selec = false;
     private String path;
-    @TableField("pass_the_audit")
-    private Integer passTheAudit;                       // 涉密文件是否审核通过
-    private Integer collect;                            // 是否收藏
-    @TableField(exist = false)
+    private Integer passTheAudit;
+    private Integer collect;
     private String security;
+    private Integer deleteState;
+    private Boolean isHandled;
 
-    @TableField("delete_state")
-    private Integer deleteState;                        // 删除时的状态
-    @TableField("is_handled")
-    private Boolean isHandled;                          // 是否手动置为已办理
+    public void setIdIfNew() { if (this.id == null) this.id = com.email.platform.UUIDLong.longValue(); }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public InMailAffair() {
         delete = false;

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.email.entity.InMailAffair" lazy="false" table="pro_inmail_affair">
+        <id name="id" type="long" column="ID" length="20">
+            <generator class="assigned" />
+        </id>
+        <property name="memberId" type="long" column="MEMBER_ID" length="20" />
+        <property name="senderId" type="long" column="SENDER_ID" length="20" />
+        <property name="subject" type="string" column="SUBJECT" />
+        <property name="objectId" type="long" column="OBJECT_ID" length="20" />
+        <property name="state" type="integer" column="STATE" />
+        <property name="delete" column="IS_DELETE" type="boolean" />
+        <property name="createDate" column="CREATE_DATE" type="timestamp" />
+        <property name="updateDate" column="UPDATE_DATE" type="timestamp" />
+        <property name="forwardMember" column="FORWARD_MEMBER" type="string" />
+        <property name="path" column="PATH" type="string" />
+        <property name="orgDepartmentId" column="ORG_DEPARTMENT_ID" type="long" />
+        <property name="orgAccountId" column="ORG_ACCOUNT_ID" type="long" />
+        <property name="readFlag" column="READ_FLAG" type="boolean" />
+        <property name="isForward" column="IS_FORWARD" type="boolean" />
+        <property name="attachmentsFlag" column="ATTACHMENTS_FLAG" type="boolean" />
+        <property name="size" type="long" column="AFFAIR_SIZE" />
+        <property name="replyType" type="integer" column="REPLY_TYPE" />
+        <property name="isReply" column="IS_REPLY" type="boolean" />
+        <property name="browseTime" column="BROWSE_TIME" type="timestamp" />
+        <property name="deleteState" type="integer" column="DELETE_STATE" />
+        <property name="isHandled" column="IS_HANDLED" type="boolean" />
+        <property name="passTheAudit" column="PASS_THE_AUDIT" type="integer" />
+        <property name="collect" column="COLLECT" type="integer" />
+    </class>
+</hibernate-mapping>

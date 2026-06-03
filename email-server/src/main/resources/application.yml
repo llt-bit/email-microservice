@@ -24,20 +24,15 @@ spring:
     type: caffeine
     caffeine:
       spec: maximumSize=10000,expireAfterWrite=10m
-
-# MyBatis-Plus 配置
-mybatis-plus:
-  mapper-locations: classpath*:mapper/**/*.xml
-  type-aliases-package: com.email.entity
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: assign_id          # 雪花算法生成主键（兼容 OA 的 Long 型 ID）
-      logic-delete-field: isDeleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
+  # Hibernate JPA 配置（替代 MyBatis，兼容 OA HQL）
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL57InnoDBDialect
+        format_sql: false
 
 # JWT 配置
 email:

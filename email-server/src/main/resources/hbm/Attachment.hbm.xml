@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.email.platform.entity.Attachment" lazy="false" table="email_attachment">
+        <id name="id" type="long" column="ID" length="20">
+            <generator class="assigned" />
+        </id>
+        <property name="subReference" type="long" column="summary_id" />
+        <property name="filename" type="string" column="file_name" length="500" />
+    </class>
+</hibernate-mapping>

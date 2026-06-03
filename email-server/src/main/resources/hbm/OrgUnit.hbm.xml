@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.email.platform.entity.OrgUnit" lazy="false" table="org_department">
+        <id name="id" type="long" column="ID" length="20">
+            <generator class="assigned" />
+        </id>
+        <property name="name" type="string" column="name" length="200" />
+        <property name="parentId" type="long" column="parent_id" />
+        <property name="accountId" type="long" column="account_id" />
+    </class>
+</hibernate-mapping>

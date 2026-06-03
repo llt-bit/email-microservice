@@ -1,0 +1,182 @@
+package com.email.platform;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * DBAgent 兼容层 —— 完全对齐 OA com.seeyon.ctp.util.DBAgent 的方法签名。
+ *
+ * <p>底层使用 Hibernate SessionFactory，所有静态方法签与 OA 一致，
+ * 确保 InternalMailManagerImpl / InternalMailDaoImpl 中的 DBAgent 调用零改动。</p>
+ */
+public class DBAgent {
+
+    private static SessionFactory sessionFactory;
+
+    public static void setSessionFactory(SessionFactory sf) {
+        sessionFactory = sf;
+    }
+
+    private static Session getSession() {
+        if (sessionFactory == null) {
+            throw new IllegalStateException("SessionFactory 未初始化");
+        }
+        // 优先从 Spring 事务获取当前 Session，否则打开新 Session
+        try {
+            return sessionFactory.getCurrentSession();
+        } catch (Exception e) {
+            return sessionFactory.openSession();
+        }
+    }
+
+    // ==================== find ====================
+
+    /**
+     * HQL 查询（不分页）
+     */
+    @SuppressWarnings("rawtypes")
+    public static List find(String hql, Map<String, Object> params) {
+        Query<?> q = getSession().createQuery(hql);
+        applyParams(q, params);
+        return q.list();
+    }
+
+    /**
+     * HQL 查询（分页，对齐 OA DBAgent.find(hql, params, flipInfo)）
+     * <p>内部处理分页和 count，结果写入 flipInfo.data 和 flipInfo.total。</p>
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static List find(String hql, Map<String, Object> params, FlipInfo fi) {
+        Query q = getSession().createQuery(hql);
+        applyParams(q, params);
+
+        // count
+        if (fi.isNeedTotal()) {
+            String countHql = buildCountHql(hql);
+            Query<?> cq = getSession().createQuery(countHql);
+            applyParams(cq, params);
+            fi.setTotal(((Number) cq.uniqueResult()).longValue());
+        }
+
+        // 分页
+        if (fi.getPage() > 0 && fi.getSize() > 0) {
+            q.setFirstResult((fi.getPage() - 1) * fi.getSize());
+            q.setMaxResults(fi.getSize());
+        }
+
+        List result = q.list();
+        fi.setData(result);
+        return result;
+    }
+
+    // ==================== get ====================
+
+    @SuppressWarnings("unchecked")
+    public static <T> T get(Class<T> clazz, Serializable id) {
+        return getSession().get(clazz, id);
+    }
+
+    // ==================== save / update / delete ====================
+
+    public static void save(Object entity) {
+        getSession().save(entity);
+    }
+
+    public static void update(Object entity) {
+        getSession().update(entity);
+    }
+
+    public static void delete(Object entity) {
+        getSession().delete(entity);
+    }
+
+    public static void saveAll(Collection<?> entities) {
+        Session s = getSession();
+        int i = 0;
+        for (Object e : entities) {
+            s.save(e);
+            if (++i % 20 == 0) { s.flush(); s.clear(); }
+        }
+    }
+
+    public static void updateAll(Collection<?> entities) {
+        Session s = getSession();
+        int i = 0;
+        for (Object e : entities) {
+            s.update(e);
+            if (++i % 20 == 0) { s.flush(); s.clear(); }
+        }
+    }
+
+    public static void deleteAll(Collection<?> entities) {
+        Session s = getSession();
+        for (Object e : entities) {
+            s.delete(e);
+        }
+    }
+
+    // ==================== 命名查询 ====================
+
+    @SuppressWarnings("rawtypes")
+    public static List findByNamedQuery(String queryName, Map<String, Object> params) {
+        Query q = getSession().getNamedQuery(queryName);
+        applyParams(q, params);
+        return q.list();
+    }
+
+    // ==================== count / bulkUpdate ====================
+
+    public static long count(String hql, Map<String, Object> params) {
+        String countHql = buildCountHql(hql);
+        Query<?> q = getSession().createQuery(countHql);
+        applyParams(q, params);
+        return ((Number) q.uniqueResult()).longValue();
+    }
+
+    public static int bulkUpdate(String hql, Map<String, Object> params) {
+        Query<?> q = getSession().createQuery(hql);
+        applyParams(q, params);
+        return q.executeUpdate();
+    }
+
+    // ==================== 内部工具 ====================
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void applyParams(Query q, Map<String, Object> params) {
+        if (params != null) {
+            for (Map.Entry<String, Object> e : params.entrySet()) {
+                q.setParameter(e.getKey(), e.getValue());
+            }
+        }
+    }
+
+    /**
+     * 把 HQL 转为 count 查询
+     */
+    private static String buildCountHql(String hql) {
+        String upper = hql.toUpperCase().trim();
+        // 去掉 SELECT ... FROM 之前的部分
+        String result = hql;
+        if (upper.startsWith("SELECT")) {
+            int fromIdx = upper.indexOf("FROM");
+            if (fromIdx > 0) {
+                result = hql.substring(fromIdx);
+            }
+        }
+        // 去掉 ORDER BY
+        int orderIdx = result.toUpperCase().lastIndexOf("ORDER BY");
+        if (orderIdx > 0) {
+            result = result.substring(0, orderIdx);
+        }
+        return "SELECT COUNT(*) " + result;
+    }
+}
