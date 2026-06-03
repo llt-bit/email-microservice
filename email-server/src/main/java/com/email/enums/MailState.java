@@ -10,11 +10,11 @@ import lombok.Getter;
 @Getter
 public enum MailState {
 
-    /** 草稿 */
-    DRAFT(0, "草稿"),
-    /** 已发送（发件箱） */
-    SENT(1, "已发送"),
-    /** 收件箱 */
+    /** 已发送（发件箱）- 注意 OA 中 ordinal=0 */
+    SENT(0, "已发送"),
+    /** 草稿 - OA 中 ordinal=1 */
+    DRAFT(1, "草稿"),
+    /** 收件箱 - OA 中 ordinal=2 */
     INBOX(2, "收件箱"),
     /** 已删除 */
     DELETED(3, "已删除"),

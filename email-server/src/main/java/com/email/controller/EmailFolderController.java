@@ -52,9 +52,12 @@ public class EmailFolderController {
     @PostMapping("/move")
     public R<Void> move(@RequestBody Map<String, Object> params) {
         @SuppressWarnings("unchecked")
-        List<Integer> affairIdInts = (List<Integer>) params.get("affairIds");
+        List<Object> affairIdList = (List<Object>) params.get("affairIds");
         Long folderId = Long.parseLong(params.get("folderId").toString());
-        List<Long> ids = affairIdInts.stream().map(Long::valueOf).collect(java.util.stream.Collectors.toList());
+        List<Long> ids = new java.util.ArrayList<>();
+        for (Object o : affairIdList) {
+            ids.add(Long.parseLong(o.toString()));
+        }
         folderService.moveMails(ids, folderId);
         return R.ok();
     }

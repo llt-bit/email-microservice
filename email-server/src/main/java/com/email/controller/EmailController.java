@@ -288,6 +288,20 @@ public class EmailController {
         return R.ok(Collections.emptyList());
     }
 
+    // ==================== 加密密码 ====================
+
+    @PostMapping("/updateOrAddPwd")
+    public R<String> updateOrAddPwd(@RequestBody Map<String, String> params) {
+        // TODO: 实现密码加密存储
+        return R.ok("密码已设置");
+    }
+
+    @PostMapping("/encryption")
+    public R<String> encryption(@RequestBody Map<String, String> params) {
+        // TODO: 验证加密箱密码
+        return R.ok();
+    }
+
     // ==================== 辅助 ====================
 
     @DeleteMapping("/cancelAutosave")

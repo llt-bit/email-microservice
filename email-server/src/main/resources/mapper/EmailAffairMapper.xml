@@ -87,7 +87,7 @@
         FROM email_affair ea
         JOIN email_summary es ON ea.summary_id = es.id
         WHERE ea.member_id = #{userId}
-          AND ea.state IN (0, 2)              <!-- 收件箱 -->
+          AND ea.state = 2                    <!-- 收件箱 (run) -->
           AND ea.is_delete = 0
           <!-- 已读/未读 -->
           <if test="params.readType == 'notRead'">
@@ -115,7 +115,7 @@
         SELECT ea.*
         FROM email_affair ea
         WHERE ea.sender_id = #{userId}
-          AND ea.state = 2                      <!-- 已发送 -->
+          AND ea.state = 0                      <!-- 已发送 (sent) -->
           AND ea.is_delete = 0
           <!-- 发件人自己给自己的也在收件箱里，这里排除 -->
           AND ea.member_id = #{userId}
@@ -201,11 +201,11 @@
 
     <select id="countGroupByState" resultType="java.util.HashMap">
         SELECT
-            SUM(CASE WHEN ea.state IN (0,2) AND ea.is_delete = 0
+            SUM(CASE WHEN ea.state = 2 AND ea.is_delete = 0
                      AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS inbox,
             SUM(CASE WHEN ea.state = 1 AND ea.is_delete = 0
                      AND ea.sender_id = #{userId} AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS draft,
-            SUM(CASE WHEN ea.state = 2 AND ea.is_delete = 0
+            SUM(CASE WHEN ea.state = 0 AND ea.is_delete = 0
                      AND ea.sender_id = #{userId} AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS sent,
             SUM(CASE WHEN ea.state = 3 AND ea.is_delete = 0
                      AND ea.member_id = #{userId} THEN 1 ELSE 0 END) AS deleted,

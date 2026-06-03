@@ -43,10 +43,11 @@ public class AuthController {
             return R.fail("用户不存在或未同步");
         }
 
-        // TODO: 实际环境中需要调 OA 接口验证密码，这里暂时做简化验证
-        // 生产环境中需要：
-        // 1. 如果 OA 可用，调 OA REST 接口验证
-        // 2. 如果 OA 不可用（宕机），用本地缓存的密码验证
+        // 密码验证：开发环境用固定密码 admin，生产环境需调 OA 接口
+        // TODO: 生产环境中调 OA REST 接口或 LDAP 验证密码
+        if (!"admin".equals(password)) {
+            return R.fail("用户名或密码错误");
+        }
 
         UserContext ctx = new UserContext();
         ctx.setUserId(member.getId());

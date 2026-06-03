@@ -44,8 +44,7 @@
         WHERE enabled = 1
           AND is_deleted = 0
           AND (name LIKE CONCAT('%', #{keyword}, '%')
-               OR login_name LIKE CONCAT('%', #{keyword}, '%')
-               OR pinyin LIKE CONCAT('%', #{keyword}, '%'))
+               OR login_name LIKE CONCAT('%', #{keyword}, '%'))
         ORDER BY name
         LIMIT 50
     </select>

@@ -8,6 +8,7 @@ import com.email.service.AiService.StreamCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
@@ -29,7 +30,8 @@ public class AiController {
 
     @Resource private AiService aiService;
 
-    @PostMapping(value = "/agent", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RequestMapping(value = "/agent", produces = MediaType.TEXT_EVENT_STREAM_VALUE,
+                    method = {RequestMethod.GET, RequestMethod.POST})
     public SseEmitter agent(@RequestParam String capability,
                              @RequestParam(required = false) String subject,
                              @RequestParam(required = false) String content,

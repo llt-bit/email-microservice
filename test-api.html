@@ -84,15 +84,15 @@ label { font-weight: bold; margin-right: 6px; color: #606266; }
   <div class="row">
     <label>方法:</label>
     <select id="customMethod"><option>GET</option><option selected>POST</option></select>
-    <label>路径:</label><input id="customPath" value="/email/counts" style="width:200px">
-    <label>Body(JSON):</label><input id="customBody" value='{"type":"inBox"}' style="width:300px">
+    <label>路径:</label><input id="customPath" value="/email/list" style="width:200px">
+    <label>Body(JSON):</label><input id="customBody" value='{"type":"inBox","pageNo":1,"pageSize":3}' style="width:300px">
     <button onclick="customRequest()">发送</button>
   </div>
   <div id="customResult" class="result" style="display:none"></div>
 </div>
 
 <script>
-const BASE = 'http://localhost:8080/api';
+const BASE = 'http://localhost:8099/api';
 let TOKEN = '';
 
 // 从 localStorage 恢复
@@ -178,11 +178,18 @@ async function customRequest() {
   const body = document.getElementById('customBody').value;
   try {
     const opts = { method, headers: hdr() };
-    if (method === 'POST' && body) opts.body = body;
+    if ((method === 'POST' || method === 'PUT') && body) {
+      // 尝试 parse 确保是合法 JSON，然后重新 stringify
+      try { opts.body = JSON.stringify(JSON.parse(body)); }
+      catch(_) { opts.body = body; }
+    }
     const res = await fetch(BASE + path, opts);
     const data = await res.json();
     div.style.display = 'block';
     div.innerHTML = JSON.stringify(data, null, 2);
+    if (!data.success) {
+      div.innerHTML += '\n\n⚠️ 服务端返回失败: ' + JSON.stringify({code: data.code, msg: data.msg});
+    }
   } catch (e) { div.style.display = 'block'; div.innerHTML = '错误: ' + e.message; }
 }
 </script>

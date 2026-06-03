@@ -324,12 +324,12 @@ public class EmailServiceImpl implements EmailService {
                 break;
             case "encryption":
                 for (EmailAffair a : affairs) {
-                    if (a != null) { a.setState(5); a.setUpdateTime(LocalDateTime.now()); }
+                    if (a != null) { a.setState(MailState.SECRET.getCode()); a.setUpdateTime(LocalDateTime.now()); }
                 }
                 break;
             case "cancelEncryption":
                 for (EmailAffair a : affairs) {
-                    if (a != null) { a.setState(2); a.setUpdateTime(LocalDateTime.now()); }
+                    if (a != null) { a.setState(MailState.INBOX.getCode()); a.setUpdateTime(LocalDateTime.now()); }
                 }
                 break;
             default:
@@ -519,7 +519,7 @@ public class EmailServiceImpl implements EmailService {
         List<EmailAffair> list = new ArrayList<>();
 
         // 收件箱状态 = 0
-        int state = isSend ? 0 : MailState.DRAFT.getCode();
+        int state = isSend ? MailState.INBOX.getCode() : MailState.DRAFT.getCode();
 
         // 解析主送人
         Set<String> allIds = new LinkedHashSet<>();
