@@ -36,7 +36,8 @@ public class HibernateConfig {
                 // 平台实体 —— HQL JOIN 时需要
                 new org.springframework.core.io.ClassPathResource("hbm/OrgMember.hbm.xml"),
                 new org.springframework.core.io.ClassPathResource("hbm/OrgUnit.hbm.xml"),
-                new org.springframework.core.io.ClassPathResource("hbm/Attachment.hbm.xml")
+                new org.springframework.core.io.ClassPathResource("hbm/Attachment.hbm.xml"),
+                new org.springframework.core.io.ClassPathResource("hbm/OrgTeamMember.hbm.xml")
         );
 
         Properties props = new Properties();

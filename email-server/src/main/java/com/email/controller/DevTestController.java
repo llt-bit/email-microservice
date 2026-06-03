@@ -5,8 +5,14 @@ import com.email.entity.InMailAffair;
 import com.email.entity.InMailSummary;
 import com.email.platform.DBAgent;
 import com.email.platform.FlipInfo;
+import com.email.platform.AppContext;
+import com.email.platform.OrgHelper;
+import com.email.platform.entity.OrgMember;
+import com.email.security.UserInfo;
+import com.email.service.OrgService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -24,6 +30,8 @@ public class DevTestController {
         System.err.println("FAIL: " + s + " => " + (v != null ? v.toString().substring(0, Math.min(200, v.toString().length())) : "null"));
     }
 
+    @Resource private OrgService orgService;
+
     @GetMapping("/run")
     public R<Map<String, Object>> runAll() {
         pass = 0; fail = 0;
@@ -36,6 +44,10 @@ public class DevTestController {
         test6_ChineseSearch();
         test7_CUD();
         test8_Count();
+        test9_AppContextBean();
+        test10_AppContextUser();
+        test11_OrgServiceResolve();
+        test12_OrgHelperStatic();
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("pass", pass);
@@ -149,5 +161,50 @@ public class DevTestController {
         long c = DBAgent.count("FROM InMailAffair WHERE memberId=:mid", params);
         if (c >= 4) ok("8.count(" + c + ")");
         else no("8.count", c);
+    }
+
+    // ==================== 阶段3适配层测试 ====================
+
+    void test9_AppContextBean() {
+        Object oa = AppContext.getBean("orgManager");
+        if (oa != null && oa instanceof OrgService) ok("9.AppContext.getBean(orgManager)");
+        else no("9.AppContext.getBean", oa);
+    }
+
+    void test10_AppContextUser() {
+        // 模拟JWT Filter设置上下文（/devtest无auth，需手动设置）
+        com.email.security.UserContext ctx = new com.email.security.UserContext();
+        ctx.setUserId(1L); ctx.setLoginName("admin"); ctx.setUserName("管理员");
+        ctx.setDepartmentId(1L); ctx.setAccountId(1L);
+        com.email.security.UserContextHolder.set(ctx);
+        try {
+            UserInfo u = AppContext.getCurrentUser();
+            if (u != null && u.getId() == 1L && "admin".equals(u.getLoginName()))
+                ok("10.AppContext.getCurrentUser(admin)");
+            else no("10.AppContext.getUser", u);
+        } finally {
+            com.email.security.UserContextHolder.clear();
+        }
+    }
+
+    void test11_OrgServiceResolve() {
+        // 解析 "Member|1" -> 应返回 admin 用户
+        Object resolved = orgService.getEntity("Member|1");
+        if (resolved != null) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> m = (Map<String, Object>) resolved;
+            if ("管理员".equals(m.get("name")) || "admin".equals(m.get("loginName")))
+                ok("11.OrgService.getEntity(Member|1)");
+            else no("11.OrgService.getEntity", m);
+        } else {
+            no("11.OrgService.getEntity", "null");
+        }
+    }
+
+    void test12_OrgHelperStatic() {
+        OrgMember m = OrgHelper.getMember(1L);
+        if (m != null && "admin".equals(m.getLoginName()))
+            ok("12.OrgHelper.getMember(1)=" + m.getName());
+        else no("12.OrgHelper.getMember", m);
     }
 }
