@@ -8,6 +8,7 @@ import com.email.enums.MailState;
 import com.email.exception.BusinessException;
 import com.email.mapper.*;
 import com.email.security.UserContextHolder;
+import com.email.service.AttachmentService;
 import com.email.service.FolderService;
 import com.email.service.EmailService;
 import lombok.extern.slf4j.Slf4j;

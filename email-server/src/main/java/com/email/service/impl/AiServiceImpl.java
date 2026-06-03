@@ -114,7 +114,7 @@ public class AiServiceImpl implements AiService {
             }
         }
 
-        void finalize() {
+        void finish() {
             String r = result.toString()
                 .replaceAll("(?is)<think>.*?</think>", "")
                 .replaceAll("(?is)<thinking>.*?</thinking>", "")
@@ -186,7 +186,7 @@ public class AiServiceImpl implements AiService {
                 }
             }
 
-            parser.finalize();
+            parser.finish();
             String ft = parser.getThinking(), fr = parser.getResult();
             if (fr.isEmpty()) { fr = ft; ft = ""; }
             if (!fr.isEmpty()) fr = cleanOutput(fr);

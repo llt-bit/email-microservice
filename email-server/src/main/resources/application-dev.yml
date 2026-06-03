@@ -3,8 +3,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/email_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
-    username: ${DB_USER:root}
-    password: ${DB_PASSWORD:root}
+    username: ${DB_USER:email_admin}
+    password: ${DB_PASSWORD:Email#2026}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
