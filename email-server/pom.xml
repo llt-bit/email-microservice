@@ -132,6 +132,13 @@
 
         <!-- API 文档: 暂时移除，启动后按需添加 -->
 
+        <!-- Apache Commons Lang (OA 代码使用 commons-lang v2) -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
         <!-- 文件压缩（邮件打包下载，导出 eml/excel） -->
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -19,4 +19,26 @@ public class Datetimes {
         if (date == null) return "";
         return new SimpleDateFormat(pattern).format(date);
     }
+
+    /** OA Datetimes.getTodayFirstTime */
+    public static java.util.Date getTodayFirstTime(String dateStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return new java.sql.Date(sdf.parse(dateStr).getTime());
+        } catch (Exception e) { return new java.util.Date(); }
+    }
+
+    /** OA Datetimes.getTodayLastTime */
+    public static java.util.Date getTodayLastTime(String dateStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return new Timestamp(sdf.parse(dateStr + " 23:59:59").getTime());
+        } catch (Exception e) { return new java.util.Date(); }
+    }
+
+    /** OA Datetimes.getDateStr */
+    public static String getDateStr(java.util.Date date, int type) {
+        if (date == null) return "";
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
 }

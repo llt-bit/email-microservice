@@ -26,6 +26,11 @@ public class DBAgent {
         sessionFactory = sf;
     }
 
+    /** 供 JDBCAgent 取 SessionFactory */
+    static SessionFactory getSessionFactorySnapshot() {
+        return sessionFactory;
+    }
+
     private static Session getSession() {
         if (sessionFactory == null) {
             throw new IllegalStateException("SessionFactory 未初始化");
@@ -208,6 +213,18 @@ public class DBAgent {
     public static int bulkUpdate(String hql, Map<String, Object> params) {
         Query<?> q = getSession().createQuery(hql);
         applyParams(q, params);
+        return q.executeUpdate();
+    }
+
+    /** OA DBAgent.bulkUpdate(hql, positionalParams...) — 兼容位置参数 */
+    public static int bulkUpdate(String hql, Object... positionalParams) {
+        Query<?> q = getSession().createQuery(hql);
+        if (positionalParams != null) {
+            int i = 0;
+            for (Object p : positionalParams) {
+                q.setParameter(i++, p);
+            }
+        }
         return q.executeUpdate();
     }
 
