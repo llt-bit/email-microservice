@@ -25,6 +25,15 @@ import java.util.*;
 @Service("orgManager")  // Bean 名对齐 OA，使 AppContext.getBean("orgManager") 可用
 public class OrgService {
 
+    /** 静态便利方法：解析 ID 列表并放入 Set（NewEmailUtils 直接调用） */
+    public static void resolveMemberSet(Set<OrgMember> target, String ids) {
+        if (Strings.isBlank(ids)) return;
+        OrgService svc = new OrgService();
+        for (OrgMember m : svc.getMembersByTypeAndIds(ids)) {
+            target.add(m);
+        }
+    }
+
     // ==================== 人员查询 ====================
 
     public OrgMember getMemberById(Long id) {

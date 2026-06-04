@@ -13,7 +13,7 @@
         <property name="subject" type="string" column="SUBJECT" />
         <property name="objectId" type="long" column="OBJECT_ID" length="20" />
         <property name="state" type="integer" column="STATE" />
-        <property name="delete" column="IS_DELETE" type="boolean" />
+        <property name="delFlag" column="IS_DELETE" type="boolean" />
         <property name="createDate" column="CREATE_DATE" type="timestamp" />
         <property name="updateDate" column="UPDATE_DATE" type="timestamp" />
         <property name="forwardMember" column="FORWARD_MEMBER" type="string" />

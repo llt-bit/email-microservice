@@ -14,7 +14,7 @@ public class InMailAffair {
     private String subject;
     private Long objectId;
     private Integer state;
-    private Boolean delete = false;
+    private Boolean delFlag = false;
     private Date createDate;
     private Date updateDate;
     private Long orgDepartmentId;
@@ -44,7 +44,7 @@ public class InMailAffair {
     public void setId(Long id) { this.id = id; }
 
     public InMailAffair() {
-        delete = false;
+        delFlag = false;
         readFlag = false;
         attachmentsFlag = false;
     }
@@ -85,8 +85,11 @@ public class InMailAffair {
     public void setObjectId(Long objectId) { this.objectId = objectId; }
     public Integer getState() { return state; }
     public void setState(Integer state) { this.state = state; }
-    public Boolean getDelete() { return delete; }
-    public void setDelete(Boolean delete) { this.delete = delete; }
+    public Boolean getDelFlag() { return delFlag; }
+    public void setDelFlag(Boolean delFlag) { this.delFlag = delFlag; }
+    /** 兼容 OA 代码中的 getDelete()/setDelete() 调用 */
+    public Boolean getDelete() { return delFlag; }
+    public void setDelete(Boolean v) { this.delFlag = v; }
     public Date getCreateDate() { return createDate; }
     public void setCreateDate(Date createDate) { this.createDate = createDate; }
     public Date getUpdateDate() { return updateDate; }
