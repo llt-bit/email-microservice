@@ -53,50 +53,98 @@ public class InternalMailManagerImpl implements InternalMailManager {
         return assemblyData(findAffairByInMailId(inMailId));
     }
 
-    // ==================== 列表 ====================
+    // ==================== 列表（OA 原样: DAO→assemblyData包装→getImgAndSecret增强） ====================
 
     @Override
     public FlipInfo findInboxAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
         param.put("memberId", userId);
-        dao.findInboxAffair(fi, param, userId, InMailConstant.InMailAffairState.run.ordinal());
+        List<InMailAffair> list = dao.findInboxAffairRaw(fi, param, userId, InMailConstant.InMailAffairState.run.ordinal());
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
     @Override
     public FlipInfo findDraftAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
         param.put("memberId", userId);
-        dao.findDraftAffair(fi, param, userId, InMailConstant.InMailAffairState.draf.ordinal());
+        List<InMailAffair> list = dao.findDraftAffairRaw(fi, param, userId, InMailConstant.InMailAffairState.draf.ordinal());
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
     @Override
     public FlipInfo findSentAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
         param.put("memberId", userId);
-        dao.findSentAffair(fi, param, userId, InMailConstant.InMailAffairState.sent.ordinal());
+        List<InMailAffair> list = dao.findSentAffairRaw(fi, param, userId, InMailConstant.InMailAffairState.sent.ordinal());
+
+        // OA 原样：发件箱检查所有收件人是否已读/已转发/已回复
+        for (int i = 0; i < list.size(); i++) {
+            InMailAffair aff = list.get(i);
+            aff.setIsForward(true);
+            aff.setIsReply(true);
+            aff.setReadFlag(true);
+
+            InMailSummary s = this.getInMailSummaryById(aff.getObjectId());
+            if (s != null) {
+                List<InMailAffair> allAffairs = dao.getInMailAffairByObjectId(s.getId());
+                for (InMailAffair ra : allAffairs) {
+                    if (Boolean.FALSE.equals(ra.getIsForward())) aff.setIsForward(false);
+                    if (Boolean.FALSE.equals(ra.getIsReply())) aff.setIsReply(false);
+                    if (Boolean.FALSE.equals(ra.getReadFlag())) aff.setReadFlag(false);
+                }
+            }
+        }
+
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
     @Override
     public FlipInfo findDeleteAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
         param.put("memberId", userId);
-        dao.findDeleteAffair(fi, param, userId, InMailConstant.InMailAffairState.deleted.ordinal());
+        List<InMailAffair> list = dao.findDeleteAffairRaw(fi, param, userId, InMailConstant.InMailAffairState.deleted.ordinal());
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
     @Override
     public FlipInfo findCollectAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
-        Map<String, Object> p = new HashMap<>();
-        p.put("mid", userId != null ? userId : AppContext.currentUserId());
-        DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND collect=1 AND state!=3 AND delFlag=0", p, fi);
+        Long uid = userId != null ? userId : AppContext.currentUserId();
+        Map<String, Object> p = new HashMap<>(); p.put("mid", uid);
+        List<InMailAffair> list = DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND collect=1 AND state!=3 AND delFlag=0", p);
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
     @Override
     public FlipInfo findInboxAffairBySecret(FlipInfo fi, Map<String, Object> param) {
         Long userId = AppContext.currentUserId();
-        Map<String, Object> p = new HashMap<>();
-        p.put("mid", userId);
-        DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND state=5 AND delFlag=0", p, fi);
+        Map<String, Object> p = new HashMap<>(); p.put("mid", userId);
+        List<InMailAffair> list = DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND state=5 AND delFlag=0", p);
+        if (list != null && !list.isEmpty()) {
+            fi.setData(assemblyData(list));
+        }
+        List<InMailAffairBO> data = fi.getData();
+        this.getImgAndSecret(data);
         return fi;
     }
 
@@ -211,13 +259,14 @@ public class InternalMailManagerImpl implements InternalMailManager {
 
     @Override
     public void recoveryAffair(String pageType, String affairId) {
-        if (!Strings.isNotBlank(affairId)) return;
-        InMailAffair a = DBAgent.get(InMailAffair.class, Long.parseLong(affairId));
-        if (a == null || a.getDeleteState() == null) return;
-        a.setState(a.getDeleteState());
-        a.setDeleteState(null);
-        a.setUpdateDate(new Date());
-        DBAgent.update(a);
+        // OA 原样：恢复时不 null 掉 deleteState，保留用于后续可能的再次恢复
+        if (Strings.isNotBlank(affairId) && Strings.isNotBlank(pageType)) {
+            InMailAffair affair = DBAgent.get(InMailAffair.class, Long.parseLong(affairId));
+            if (affair != null) {
+                affair.setState(affair.getDeleteState());
+            }
+            DBAgent.update(affair);
+        }
     }
 
     @Override
@@ -294,7 +343,27 @@ public class InternalMailManagerImpl implements InternalMailManager {
         return Collections.emptyList();
     }
 
-    // ==================== 内部工具 (从 OA getInMailAffairBO 原样复制逻辑) ====================
+    // ==================== 内部工具 ====================
+
+    /**
+     * 给 BO 列表添加密级与头像 —— 从 OA getImgAndSecret 原样复制逻辑。
+     */
+    @SuppressWarnings("unchecked")
+    private void getImgAndSecret(List<InMailAffairBO> data) {
+        if (data == null || data.isEmpty()) return;
+        for (InMailAffairBO bo : data) {
+            Long senderId = bo.getSenderId();
+            bo.setIdStr(bo.getId().toString());
+            bo.setMemberIdStr(bo.getMemberId().toString());
+            bo.setSenderIdStr(senderId.toString());
+            bo.setSummaryIdStr(bo.getSummaryId().toString());
+            // 密级：OA 中查 FileSecretMapManager/FileSecretManager，独立后简化为默认值
+            bo.setSecretNameStr("");
+            bo.setSecretIdStr("");
+            // 头像
+            bo.setImg("");
+        }
+    }
 
     /**
      * 组装 BO 列表 —— 从 OA getInMailAffairBO 逐逻辑复制。

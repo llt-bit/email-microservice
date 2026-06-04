@@ -44,49 +44,51 @@ public class InternalMailDao {
 
     /** 收件箱 */
     @SuppressWarnings("unchecked")
-    public void findInboxAffair(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
+    public List<InMailAffair> findInboxAffairRaw(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
         StringBuilder hql = new StringBuilder("FROM InMailAffair m ");
         Map<String, Object> p = new HashMap<>();
-
-        // OA 原样 HQL: FROM InMailSummary p, InMailAffair m WHERE p.id=m.objectId
         boolean hasJoin = false;
         if (param.get("subject") != null || param.get("contentName") != null || param.get("attachName") != null) {
             hql.insert(0, "SELECT m FROM InMailSummary p, InMailAffair m ");
             hasJoin = true;
         }
         appendWhere(hql, param, memberId, state, hasJoin, p);
-        DBAgent.find(hql.toString(), p, fi);
+        List<InMailAffair> list = DBAgent.find(hql.toString(), p, fi);
+        return list != null ? list : Collections.emptyList();
     }
 
     /** 发件箱 */
     @SuppressWarnings("unchecked")
-    public void findSentAffair(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
+    public List<InMailAffair> findSentAffairRaw(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
         String hql = "FROM InMailAffair WHERE senderId=:sid AND state=0 AND delFlag=0 AND memberId=:sid";
         Map<String, Object> p = new HashMap<>(); p.put("sid", memberId);
-        DBAgent.find(hql, p, fi);
+        List<InMailAffair> list = DBAgent.find(hql, p, fi);
+        return list != null ? list : Collections.emptyList();
     }
 
     /** 草稿箱 */
     @SuppressWarnings("unchecked")
-    public void findDraftAffair(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
+    public List<InMailAffair> findDraftAffairRaw(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
         String hql = "FROM InMailAffair WHERE senderId=:sid AND state=1 AND delFlag=0 AND memberId=:sid ORDER BY updateDate DESC";
         Map<String, Object> p = new HashMap<>(); p.put("sid", memberId);
-        DBAgent.find(hql, p, fi);
+        List<InMailAffair> list = DBAgent.find(hql, p, fi);
+        return list != null ? list : Collections.emptyList();
     }
 
     /** 已删除 */
     @SuppressWarnings("unchecked")
-    public void findDeleteAffair(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
+    public List<InMailAffair> findDeleteAffairRaw(FlipInfo fi, Map<String, Object> param, Long memberId, int state) {
         String hql = "FROM InMailAffair WHERE memberId=:mid AND state=3 AND delFlag=0 ORDER BY updateDate DESC";
         Map<String, Object> p = new HashMap<>(); p.put("mid", memberId);
-        DBAgent.find(hql, p, fi);
+        List<InMailAffair> list = DBAgent.find(hql, p, fi);
+        return list != null ? list : Collections.emptyList();
     }
 
-    /** 收件箱未读/已办数量 */
+    /** 收件箱数量——对齐 OA: state IN (0,2) 因为自己发自己的也会显示在收件箱 */
     public int findInboxNextAffair(Map<String, Object> param) {
         Long memberId = (Long) param.get("memberId");
         Map<String, Object> p = new HashMap<>(); p.put("mid", memberId);
-        return (int) DBAgent.count("FROM InMailAffair WHERE memberId=:mid AND state=2 AND delFlag=0", p);
+        return (int) DBAgent.count("FROM InMailAffair WHERE memberId=:mid AND state IN (0,2) AND delFlag=0", p);
     }
 
     @SuppressWarnings("unchecked")
