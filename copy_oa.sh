@@ -1,0 +1,108 @@
+#!/bin/bash
+set -e
+DSTDIR="/d/chenlq/email-microservice/email-server/src/main/java/com/email/service"
+SRCFILE="/d/Seeyon/OA_AGENT/apps-customize/src/main/java/com/seeyon/ctp/rest/resources/util/NewEmailUtils.java"
+TMP="/d/chenlq/email-microservice/email-server/src/main/java/com/email/service/NewEmailUtilsFull.java"
+
+cp "$SRCFILE" "$TMP"
+
+# 1. package
+sed -i 's|^package com.seeyon.ctp.rest.resources.util;|package com.email.service;|' "$TMP"
+
+# 2. Remove old OA-only imports
+sed -i '/^import com.seeyon.apps.filehandle.even.BulletinSaveEventPlugin;/d' "$TMP"
+sed -i '/^import com.seeyon.ctp.rest.resources.result.JsonResult;/d' "$TMP"
+sed -i '/^import com.seeyon.ctp.organization.po.OrgMember;/d' "$TMP"
+
+# 3. Import replacements
+sed -i 's|^import com.seeyon.apps.internalmail.constants.InMailConstant;|import com.email.constants.InMailConstant;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.po.InMailAffair;|import com.email.entity.InMailAffair;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.po.InMailSummary;|import com.email.entity.InMailSummary;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.po.InMailSummaryBO;|import com.email.entity.InMailSummaryBO;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.po.InMailSummaryMembersPo;|import com.email.entity.InMailSummaryMembersPo;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.util.EmailDESUtil;|import com.email.util.EmailDESUtil;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.util.InMailUtil;|import com.email.util.InMailUtil;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.even.MailSaveEventPlugin;|import com.email.stub.OaCompat.MailSaveEventPlugin;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.even.MailSendEventPlugin;|import com.email.stub.OaCompat.MailSendEventPlugin;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.listener.MyCollaborationEventListener;|import com.email.stub.OaCompat.MyCollaborationEventListenerStub;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.manager.InMailOfficeTransManager;|import com.email.stub.OaCompat.InMailOfficeTransManagerStub;|' "$TMP"
+sed -i 's|^import com.seeyon.apps.internalmail.manager.InternalMailManager;|import com.email.manager.InternalMailManager;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.AppContext;|import com.email.platform.AppContext;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.SystemEnvironment;|import com.email.platform.AppContext;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.log.CtpLogFactory;|import org.apache.commons.logging.LogFactory;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.login.UserUtil;|import com.email.stub.OaCompat.UserUtil;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.util.Datetimes;|import com.email.platform.Datetimes;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.util.Strings;|import com.email.platform.Strings;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.util.UUIDLong;|import com.email.platform.UUIDLong;|' "$TMP"
+sed -i 's|^import com.seeyon.v3x.bulletin.util.BulletinUtils;|import com.email.stub.OaCompat.BulletinUtilsCompat;|' "$TMP"
+sed -i 's|^import com.seeyon.v3x.common.web.login.CurrentUser;|import com.email.stub.OaCompat.CurrentUser;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.dao.OrgHelper;|import com.email.platform.OrgHelper;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.authenticate.domain.User;|import com.email.security.UserInfo;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.bo.V3xOrgEntity;|import com.email.stub.V3xOrgAdapter.Entity;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.bo.V3xOrgMember;|import com.email.stub.V3xOrgAdapter.Member;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.bo.V3xOrgDepartment;|import com.email.stub.V3xOrgAdapter.Department;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.bo.V3xOrgAccount;|import com.email.stub.V3xOrgAdapter.Account;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.manager.OrgManager;|import com.email.stub.OrgManagerAdapter;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.constants.ApplicationCategoryEnum;|import com.email.stub.OaCompat.ApplicationCategoryEnum;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.po.filemanager.Attachment;|import com.email.stub.OaCompat.Attachment;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.po.filemanager.V3XFile;|import com.email.stub.OaCompat.V3XFile;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.filemanager.manager.AttachmentManager;|import com.email.stub.OaCompat.AttachmentManagerAdapter;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.filemanager.manager.FileManager;|import com.email.stub.OaCompat.FileManagerAdapter;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.filemanager.manager.PartitionManager;|import com.email.stub.OaCompat.PartitionManagerAdapter;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.quartz.QuartzHolder;|import com.email.stub.OaCompat.QuartzHolderCompat;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.usermessage.MessageContent;|import com.email.stub.OaCompat.MessageContent;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.usermessage.MessageReceiver;|import com.email.stub.OaCompat.MessageReceiver;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.usermessage.UserMessageManager;|import com.email.stub.OaCompat.UserMessageManagerStub;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.event.EventDispatcher;|import com.email.stub.OaCompat.EventDispatcherCompat;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.manager.CheckSecretManager;|import com.email.stub.OaCompat.CheckSecretManager;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.manager.FileSecretManager;|import com.email.stub.OaCompat.FileSecretManager;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.manager.FileSecretMapManager;|import com.email.stub.OaCompat.FileSecretMapManager;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.po.FileSecretLevel;|import com.email.stub.OaCompat.FileSecretLevel;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.po.FileSecretMap;|import com.email.stub.OaCompat.FileSecretMap;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.po.PoEnum;|import com.email.stub.OaCompat.PoEnum;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.util.PluginAuthorUtil;|import com.email.stub.OaCompat.PluginAuthorUtil;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.securitymanage.util.SecretManagerPlugin;|import com.email.stub.OaCompat.SecretManagerPlugin;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.common.exceptions.BusinessException;|import com.email.exception.BusinessException;|' "$TMP"
+sed -i 's|^import com.seeyon.ctp.organization.po.OrgUnit;|import com.email.platform.entity.OrgUnit;|' "$TMP"
+
+# 4. Code body type replacements
+sed -i 's|V3xOrgMember|V3xOrgAdapter.Member|g' "$TMP"
+sed -i 's|V3xOrgDepartment|V3xOrgAdapter.Department|g' "$TMP"
+sed -i 's|V3xOrgAccount|V3xOrgAdapter.Account|g' "$TMP"
+sed -i 's|V3xOrgEntity|V3xOrgAdapter.Entity|g' "$TMP"
+
+# 5. AppContext.getBean calls
+sed -i 's|(OrgManager) AppContext.getBean("orgManager")|new com.email.stub.OrgManagerAdapter()|g' "$TMP"
+sed -i 's|(AttachmentManager) AppContext.getBean|new com.email.stub.OaCompat.AttachmentManagerAdapter() //stub|g' "$TMP"
+sed -i 's|(FileSecretManager) AppContext.getBean("fileSecretManager")|new com.email.stub.OaCompat.FileSecretManager()|g' "$TMP"
+sed -i 's|(FileSecretMapManager) AppContext.getBean("fileSecretMapManager")|new com.email.stub.OaCompat.FileSecretMapManager()|g' "$TMP"
+sed -i 's|(CheckSecretManager) AppContext.getBean("checkSecretManager")|new com.email.stub.OaCompat.CheckSecretManager()|g' "$TMP"
+sed -i 's|(UserMessageManager) AppContext.getBean("userMessageManager")|new com.email.stub.OaCompat.UserMessageManagerStub()|g' "$TMP"
+sed -i 's|(MyCollaborationEventListener) AppContext.getBean("myCollaborationEventListener")|new com.email.stub.OaCompat.MyCollaborationEventListenerStub()|g' "$TMP"
+sed -i 's|(InMailOfficeTransManager) AppContext.getBean("inMailOfficeTransManager")|new com.email.stub.OaCompat.InMailOfficeTransManagerStub()|g' "$TMP"
+sed -i 's|(FileManager) AppContext.getBean("fileManager")|new com.email.stub.OaCompat.FileManagerAdapter()|g' "$TMP"
+sed -i 's|(PartitionManager) AppContext.getBean("partitionManager")|new com.email.stub.OaCompat.PartitionManagerAdapter()|g' "$TMP"
+
+# 6. Static references
+sed -i 's|CtpLogFactory.getLog|org.apache.commons.logging.LogFactory.getLog|g' "$TMP"
+sed -i 's|SystemEnvironment.getSystemTempFolder()|System.getProperty("java.io.tmpdir")|g' "$TMP"
+sed -i 's|QuartzHolder.newQuartzJob|com.email.stub.OaCompat.QuartzHolderCompat.newQuartzJob|g' "$TMP"
+sed -i 's|EventDispatcher.fireEvent|com.email.stub.OaCompat.EventDispatcherCompat.fireEvent|g' "$TMP"
+
+# 7. Method signature type replacements
+sed -i 's|AttachmentManager attachmentManager|com.email.stub.OaCompat.AttachmentManagerAdapter attachmentManager|g' "$TMP"
+sed -i 's|OrgManager orgManager|com.email.stub.OrgManagerAdapter orgManager|g' "$TMP"
+sed -i 's|FileManager fileManager|com.email.stub.OaCompat.FileManagerAdapter fileManager|g' "$TMP"
+
+# 8. User class
+sed -i 's|UserUtil.build|com.email.stub.OaCompat.UserUtil.build|g' "$TMP"
+sed -i 's|UserUtil.setCurrentUser|com.email.stub.OaCompat.UserUtil.setCurrentUser|g' "$TMP"
+sed -i 's|User user|com.email.security.UserInfo user|g' "$TMP"
+sed -i 's|(User)AppContext|(com.email.security.UserInfo)AppContext|g' "$TMP"
+sed -i 's|new User()|new com.email.security.UserInfo()|g' "$TMP"
+
+echo "=== DONE: $(wc -l < "$TMP") lines ==="
+echo "=== Count remaining seeyon refs ==="
+grep -c "com\.seeyon" "$TMP" || echo "0"
+echo "=== Count remaining V3xOrg refs ==="
+grep -c "V3xOrg" "$TMP" || echo "0"

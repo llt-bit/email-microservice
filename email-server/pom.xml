@@ -132,6 +132,32 @@
 
         <!-- API 文档: 暂时移除，启动后按需添加 -->
 
+        <!-- ===== OA 完整迁移所需的外部库 ===== -->
+        <!-- dom4j: 邮件正文HTML解析(getImagSize/getFlashSize/allReply) -->
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.4</version>
+        </dependency>
+        <!-- javax.mail: EML导出（exportEmail） -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+        <!-- commons-beanutils: 附件ID数组转换（NewEmailUtils存草稿） -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <!-- ant: ZIP压缩（exportEmail邮件打包下载） -->
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.10.14</version>
+        </dependency>
+
         <!-- Apache Commons Lang (OA 代码使用 commons-lang v2) -->
         <dependency>
             <groupId>commons-lang</groupId>

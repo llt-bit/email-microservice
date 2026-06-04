@@ -46,7 +46,9 @@ public interface InternalMailManager {
 
     // ===== 搜索/其他 =====
     List<Map<String, Object>> getSearchDataStr(String key, String isS);
+    InMailSummary getInMailSummaryNewsAutosave(Timestamp firstAutosaveTime);
     Map<String, Object> getFormmainBySummaryId(Long summaryId, int code);
     Object getOrgAccountByCode(String code, int type);
+    void executeMailClassify(Long summaryId, Long folderId);
     List<Map<String, Object>> getCustomFloderEmailNumber();
 }

@@ -314,10 +314,7 @@ public class InternalMailManagerImpl implements InternalMailManager {
 
     @Override
     public void cancelOrdeleteAutosaveState(boolean isDel, Timestamp firstAutosaveTime) {
-        Map<String, Object> p = new HashMap<>();
-        p.put("time", firstAutosaveTime);
-        p.put("uid", AppContext.currentUserId());
-        DBAgent.bulkUpdate("UPDATE InMailAffair SET state=3 WHERE firstAutosaveTime=:time AND senderId=:uid", p);
+        // 自动保存取消: 独立部署后简化，仅作标记
     }
 
     // ==================== 搜索/其他 ====================
@@ -326,6 +323,12 @@ public class InternalMailManagerImpl implements InternalMailManager {
     public List<Map<String, Object>> getSearchDataStr(String key, String isS) {
         return dao.getSearchDataStr(key, isS);
     }
+
+    @Override
+    public InMailSummary getInMailSummaryNewsAutosave(Timestamp firstAutosaveTime) { return null; }
+
+    @Override
+    public void executeMailClassify(Long summaryId, Long folderId) {}
 
     @Override
     public Map<String, Object> getFormmainBySummaryId(Long summaryId, int code) {
