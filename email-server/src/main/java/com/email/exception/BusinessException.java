@@ -1,11 +1,9 @@
 package com.email.exception;
 
-import lombok.Getter;
 
 /**
  * 业务异常（替代 OA 的 BusinessException）。
  */
-@Getter
 public class BusinessException extends RuntimeException {
 
     private final int code;
@@ -19,4 +17,6 @@ public class BusinessException extends RuntimeException {
         super(message);
         this.code = code;
     }
+
+    public int getCode() { return code; }
 }

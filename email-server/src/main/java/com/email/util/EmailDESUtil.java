@@ -1,6 +1,5 @@
 package com.email.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +17,10 @@ import java.util.Base64;
  * <p>密钥通过系统属性 {@code internalmail.mailKey} 配置，原 OA 中存储在 {@code pluginProperties.xml}。
  * 剥离后改为 applicaton.yml 中的 {@code internalmail.mailKey} 配置项。</p>
  */
-@Slf4j
+
 @Component
 public class EmailDESUtil {
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(EmailDESUtil.class);
 
     private static final String ALGORITHM = "DES";
 

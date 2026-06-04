@@ -9,6 +9,8 @@ import java.sql.Timestamp;
 public class InMailFolder {
 
     private Long id;
+
+    public void setIdIfNew() { if (this.id == null) this.id = com.email.platform.UUIDLong.longValue(); }
     private Long memberId;
     private String path;
     private String type;

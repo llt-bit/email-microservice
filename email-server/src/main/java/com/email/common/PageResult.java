@@ -1,13 +1,11 @@
 package com.email.common;
 
-import lombok.Data;
 
 import java.util.List;
 
 /**
  * 分页结果（替代 OA 的 FlipInfo 分页对象）。
  */
-@Data
 public class PageResult<T> {
 
     /** 数据列表 */

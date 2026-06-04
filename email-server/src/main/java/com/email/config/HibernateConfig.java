@@ -32,6 +32,7 @@ public class HibernateConfig {
                 new org.springframework.core.io.ClassPathResource("hbm/InMailAffair.hbm.xml"),
                 new org.springframework.core.io.ClassPathResource("hbm/InMailSecret.hbm.xml"),
                 new org.springframework.core.io.ClassPathResource("hbm/InMailSummaryMembers.hbm.xml"),
+                new org.springframework.core.io.ClassPathResource("hbm/InMailFolder.hbm.xml"),
                 new org.springframework.core.io.ClassPathResource("hbm/MyQuery.hbm.xml"),
                 // 平台实体 —— HQL JOIN 时需要
                 new org.springframework.core.io.ClassPathResource("hbm/OrgMember.hbm.xml"),

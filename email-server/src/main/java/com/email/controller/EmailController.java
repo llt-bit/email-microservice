@@ -8,7 +8,6 @@ import com.email.platform.entity.OrgMember;
 import com.email.security.UserContextHolder;
 import com.email.service.NewEmailUtils;
 import com.email.util.InMailUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -19,7 +18,7 @@ import java.util.*;
  * 邮件 REST API —— 从 OA EmailPCResource 迁移为 Spring MVC。
  * 所有 API 签名和行为与 OA 保持一致。
  */
-@Slf4j
+
 @RestController
 @RequestMapping("/email")
 public class EmailController {
@@ -164,8 +163,9 @@ public class EmailController {
         String flagType = params.get("flagType");
         if (affairId == null || flagType == null) return R.fail("参数缺失");
 
-        mgr.updateAllAffairIsHandle(parseIds(affairId), flagType);
-        return R.ok("操作成功");
+        boolean ok = mgr.updateAllAffairIsHandle(parseIds(affairId), flagType);
+        if (ok) return R.ok("操作成功");
+        return R.fail("操作失败");
     }
 
     @PostMapping("/tagUnRead")

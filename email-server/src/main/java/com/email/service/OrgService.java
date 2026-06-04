@@ -5,7 +5,6 @@ import com.email.platform.DBAgent;
 import com.email.platform.Strings;
 import com.email.platform.entity.OrgMember;
 import com.email.platform.entity.OrgUnit;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,9 +20,10 @@ import java.util.*;
  * 的类名，hbm.xml 也需要相应映射。这里简化处理——getMemberById 等直接查表返回 Map。
  * 真正的 V3xOrg* 类在后续阶段4搬迁时再写兼容包装。</p>
  */
-@Slf4j
+
 @Service("orgManager")  // Bean 名对齐 OA，使 AppContext.getBean("orgManager") 可用
 public class OrgService {
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(OrgService.class);
 
     /** 静态便利方法：解析 ID 列表并放入 Set（NewEmailUtils 直接调用） */
     public static void resolveMemberSet(Set<OrgMember> target, String ids) {
@@ -75,7 +75,7 @@ public class OrgService {
                     }
                 }
             } catch (NumberFormatException e) {
-                log.debug("无法解析组织ID: {}", idStr);
+                log.debug("无法解析组织ID: " + idStr);
             }
         }
         return result;

@@ -1,7 +1,6 @@
 package com.email.config;
 
 import io.minio.MinioClient;
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 /**
  * MinIO 对象存储配置。
  */
-@Data
 @Configuration
 @ConfigurationProperties(prefix = "email.minio")
 public class MinioConfig {
@@ -27,4 +25,9 @@ public class MinioConfig {
                 .credentials(accessKey, secretKey)
                 .build();
     }
+    public String getEndpoint() { return endpoint; } public void setEndpoint(String v) { this.endpoint = v; }
+    public String getAccessKey() { return accessKey; } public void setAccessKey(String v) { this.accessKey = v; }
+    public String getSecretKey() { return secretKey; } public void setSecretKey(String v) { this.secretKey = v; }
+    public String getBucket() { return bucket; } public void setBucket(String v) { this.bucket = v; }
+    public int getPresignExpiry() { return presignExpiry; } public void setPresignExpiry(int v) { this.presignExpiry = v; }
 }

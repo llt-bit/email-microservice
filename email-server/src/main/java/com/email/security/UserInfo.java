@@ -1,12 +1,8 @@
 package com.email.security;
 
-import lombok.Data;
-
 /**
  * 替代 OA com.seeyon.ctp.common.authenticate.domain.User。
- * 保留与原 OA User 相同的方法签名，确保 InMailUtil 等工具类可逐字复制。
  */
-@Data
 public class UserInfo {
     private Long id;
     private String name;
@@ -16,7 +12,6 @@ public class UserInfo {
     private Long postId;
     private String remoteAddr;
 
-    /** 从 UserContext 构建 */
     public static UserInfo fromCurrentUser() {
         UserInfo u = new UserInfo();
         UserContext ctx = UserContextHolder.get();
@@ -28,7 +23,14 @@ public class UserInfo {
         return u;
     }
 
-    /** OA 代码中常用的构造器: new User(id, name, ...) */
     public UserInfo() {}
     public UserInfo(Long id, String name) { this.id = id; this.name = name; }
+
+    public Long getId() { return id; } public void setId(Long v) { this.id = v; }
+    public String getName() { return name; } public void setName(String v) { this.name = v; }
+    public String getLoginName() { return loginName; } public void setLoginName(String v) { this.loginName = v; }
+    public Long getDepartmentId() { return departmentId; } public void setDepartmentId(Long v) { this.departmentId = v; }
+    public Long getLoginAccount() { return loginAccount; } public void setLoginAccount(Long v) { this.loginAccount = v; }
+    public Long getPostId() { return postId; } public void setPostId(Long v) { this.postId = v; }
+    public String getRemoteAddr() { return remoteAddr; } public void setRemoteAddr(String v) { this.remoteAddr = v; }
 }

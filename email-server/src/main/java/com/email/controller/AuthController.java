@@ -6,7 +6,6 @@ import com.email.platform.entity.OrgMember;
 import com.email.security.JwtTokenProvider;
 import com.email.security.UserContext;
 import com.email.security.UserContextHolder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -19,7 +18,7 @@ import java.util.Map;
  * <p>开发环境：admin/admin 直接登录。
  * 生产环境：调 OA 接口验证密码后签发 JWT（或通过 OA SSO 跳转传入 token）。</p>
  */
-@Slf4j
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {

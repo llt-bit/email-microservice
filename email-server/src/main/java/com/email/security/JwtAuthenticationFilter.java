@@ -1,6 +1,5 @@
 package com.email.security;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,9 +16,9 @@ import java.util.Collections;
 /**
  * JWT 认证过滤器 —— 每个请求进入时解析 Token，设置用户上下文。
  */
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(JwtAuthenticationFilter.class);
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
@@ -46,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {
-                log.debug("Token 解析失败: {}", e.getMessage());
+                log.debug("Token 解析失败: " + e.getMessage());
             }
         }
 

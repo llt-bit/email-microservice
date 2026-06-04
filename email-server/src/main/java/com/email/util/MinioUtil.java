@@ -4,7 +4,6 @@ import com.email.config.MinioConfig;
 import com.email.exception.BusinessException;
 import io.minio.*;
 import io.minio.http.Method;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,9 +16,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * MinIO 文件操作工具（替代 OA 的 FileManager/AttachmentManager）。
  */
-@Slf4j
+
 @Component
 public class MinioUtil {
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(MinioUtil.class);
 
     private final MinioClient minioClient;
     private final MinioConfig config;
@@ -37,10 +37,10 @@ public class MinioUtil {
             if (!exists) {
                 minioClient.makeBucket(
                         MakeBucketArgs.builder().bucket(config.getBucket()).build());
-                log.info("MinIO bucket [{}] 创建成功", config.getBucket());
+                log.info("MinIO bucket 创建成功: " + config.getBucket());
             }
         } catch (Exception e) {
-            log.warn("MinIO 不可用（附件功能暂不可用）: {}", e.getMessage());
+            log.warn("MinIO 不可用（附件功能暂不可用）: " + e.getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ public class MinioUtil {
                     .contentType(file.getContentType())
                     .build());
 
-            log.info("附件上传成功: {} ({} bytes)", objectName, file.getSize());
+            log.info("附件上传成功: " + objectName + " " + file.getSize() + " bytes");
             return objectName;
         } catch (Exception e) {
             log.error("附件上传失败", e);
@@ -114,7 +114,7 @@ public class MinioUtil {
                             .expiry(config.getPresignExpiry(), TimeUnit.SECONDS)
                             .build());
         } catch (Exception e) {
-            log.error("获取预签名URL失败: {}", objectName, e);
+            log.error("获取预签名URL失败: " + objectName, e);
             throw new BusinessException("获取下载链接失败");
         }
     }
@@ -129,7 +129,7 @@ public class MinioUtil {
                     .object(objectName)
                     .build());
         } catch (Exception e) {
-            log.error("附件下载失败: {}", objectName, e);
+            log.error("附件下载失败: " + objectName, e);
             throw new BusinessException("附件下载失败");
         }
     }
@@ -141,7 +141,7 @@ public class MinioUtil {
                     .object(objectName)
                     .build());
         } catch (Exception e) {
-            log.warn("附件删除失败: {}", objectName, e);
+            log.warn("附件删除失败: " + objectName, e);
         }
     }
 }

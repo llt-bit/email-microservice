@@ -2,7 +2,6 @@ package com.email.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +16,9 @@ import java.util.Date;
  * 1. 从邮件微服务自身登录签发（方案B：独立登录）
  * 2. 从 OA 通过 SSO 密钥签发后传入（方案A：推荐）</p>
  */
-@Slf4j
 @Component
 public class JwtTokenProvider {
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(JwtTokenProvider.class);
 
     private final SecretKey key;
     private final SecretKey ssoKey;
@@ -80,7 +79,7 @@ public class JwtTokenProvider {
                     .getBody();
             return buildUserContext(claims);
         } catch (JwtException e) {
-            log.warn("OA SSO Token 验证失败: {}", e.getMessage());
+            log.warn("OA SSO Token 验证失败: " + e.getMessage());
             return null;
         }
     }

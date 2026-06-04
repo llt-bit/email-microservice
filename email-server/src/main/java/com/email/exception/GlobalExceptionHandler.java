@@ -1,7 +1,6 @@
 package com.email.exception;
 
 import com.email.common.R;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,14 +14,14 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 /**
  * 全局异常处理 —— 将异常转为统一 JSON 响应。
  */
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.OK)
     public R<Void> handleBusiness(BusinessException e) {
-        log.warn("业务异常: {}", e.getMessage());
+        log.warn("业务异常: " + e.getMessage());
         return R.fail(e.getCode(), e.getMessage());
     }
 

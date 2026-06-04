@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.email.entity.InMailFolder" lazy="false" table="pro_inmail_folder">
+        <id name="id" type="long" column="ID" length="20"><generator class="assigned" /></id>
+        <property name="memberId" type="long" column="MEMBER_ID" />
+        <property name="path" type="string" column="PATH" />
+        <property name="type" type="string" column="TYPE" />
+        <property name="isDelete" type="integer" column="IS_DELETE" />
+        <property name="rule" type="string" column="RULE" />
+        <property name="fileName" type="string" column="FILE_NAME" />
+        <property name="createDate" type="timestamp" column="CREATE_DATE" />
+    </class>
+</hibernate-mapping>

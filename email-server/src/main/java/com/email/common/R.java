@@ -1,6 +1,5 @@
 package com.email.common;
 
-import lombok.Data;
 
 import java.io.Serializable;
 
@@ -12,7 +11,6 @@ import java.io.Serializable;
  * 这里统一为：success=true/false + code(数字) + msg + data。
  * 前端改造时统一适配新结构。</p>
  */
-@Data
 public class R<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -56,4 +54,14 @@ public class R<T> implements Serializable {
         r.msg = msg;
         return r;
     }
+
+    // Manual getters (Lombok removed)
+    public boolean isSuccess() { return success; }
+    public int getCode() { return code; }
+    public String getMsg() { return msg; }
+    public T getData() { return data; }
+    public void setSuccess(boolean v) { this.success = v; }
+    public void setCode(int v) { this.code = v; }
+    public void setMsg(String v) { this.msg = v; }
+    public void setData(T v) { this.data = v; }
 }
