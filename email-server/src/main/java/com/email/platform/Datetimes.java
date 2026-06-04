@@ -41,4 +41,10 @@ public class Datetimes {
         if (date == null) return "";
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
+
+    /** OA Datetimes.formatDatetime —— 格式化日期时间 */
+    public static String formatDatetime(java.util.Date date, int type) {
+        if (date == null) return "";
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
 }

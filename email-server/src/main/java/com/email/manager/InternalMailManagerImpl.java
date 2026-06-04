@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -86,17 +85,17 @@ public class InternalMailManagerImpl implements InternalMailManager {
 
     @Override
     public FlipInfo findCollectAffair(FlipInfo fi, Long userId, Map<String, Object> param) {
-        // 收藏：collect=1 且 state!=3(不在已删除中)
         Map<String, Object> p = new HashMap<>();
-        p.put("mid", userId);
+        p.put("mid", userId != null ? userId : AppContext.currentUserId());
         DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND collect=1 AND state!=3 AND delFlag=0", p, fi);
         return fi;
     }
 
     @Override
     public FlipInfo findInboxAffairBySecret(FlipInfo fi, Map<String, Object> param) {
+        Long userId = AppContext.currentUserId();
         Map<String, Object> p = new HashMap<>();
-        p.put("mid", param.get("userId"));
+        p.put("mid", userId);
         DBAgent.find("FROM InMailAffair WHERE memberId=:mid AND state=5 AND delFlag=0", p, fi);
         return fi;
     }
@@ -145,26 +144,43 @@ public class InternalMailManagerImpl implements InternalMailManager {
     @Override
     public boolean updateAllAffairIsHandle(List<Long> affairIds, String flagType) {
         if (affairIds == null || affairIds.isEmpty()) return false;
-        List<InMailAffair> list = dao.getInMailAffairsByIds(affairIds);
-        switch (flagType) {
-            case "handled":
-                for (InMailAffair a : list) { a.setIsHandled(true); a.setUpdateDate(new Date()); }
-                break;
-            case "collection":
-                for (InMailAffair a : list) { a.setCollect(1); a.setUpdateDate(new Date()); }
-                break;
-            case "cancelCollection":
-                for (InMailAffair a : list) { a.setCollect(0); a.setUpdateDate(new Date()); }
-                break;
-            case "encryption":
-                for (InMailAffair a : list) { a.setState(5); a.setUpdateDate(new Date()); }
-                break;
-            case "cancelEncryption":
-                for (InMailAffair a : list) { a.setState(2); a.setUpdateDate(new Date()); }
-                break;
-            default: return false;
+        List<InMailAffair> toUpdate = new ArrayList<>();
+        for (Long id : affairIds) {
+            InMailAffair a = DBAgent.get(InMailAffair.class, id);
+            if (a == null) continue;
+            // OA 原样验证逻辑（Boolean 值处理 null 安全）
+            if ("handled".equals(flagType)) {
+                if (Boolean.TRUE.equals(a.getIsHandled()) || Boolean.TRUE.equals(a.getIsReply()) || Boolean.TRUE.equals(a.getIsForward())) {
+                    return false;
+                }
+                a.setIsHandled(true);
+                toUpdate.add(a);
+            } else if ("collection".equals(flagType)) {
+                if (a.getCollect() == null || a.getCollect() != 1) {
+                    a.setCollect(1);
+                    toUpdate.add(a);
+                } else {
+                    return false;
+                }
+            } else if ("cancelCollection".equals(flagType)) {
+                a.setCollect(0);
+                toUpdate.add(a);
+            } else if ("encryption".equals(flagType)) {
+                if (a.getState() != 5) {
+                    a.setState(5);
+                    a.setDeleteState(5); // OA 原样：记录加密时状态
+                    toUpdate.add(a);
+                } else {
+                    return false;
+                }
+            } else if ("cancelEncryption".equals(flagType)) {
+                a.setState(2);
+                toUpdate.add(a);
+            } else {
+                return false;
+            }
         }
-        updateInMailAffairs(list);
+        DBAgent.updateAll(toUpdate);
         return true;
     }
 
@@ -172,19 +188,24 @@ public class InternalMailManagerImpl implements InternalMailManager {
 
     @Override
     public void deleteAffair(String pageType, String affairId) {
-        if (!Strings.isNotBlank(affairId) || !Strings.isNotBlank(pageType)) return;
+        if (!Strings.isNotBlank(affairId)) return;
         InMailAffair a = DBAgent.get(InMailAffair.class, Long.parseLong(affairId));
         if (a == null) return;
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        // OA 原样: "delete"表示从已删除中彻底删除
         if ("delete".equals(pageType)) {
             a.setDelete(true);
+            a.setUpdateDate(now);
         } else {
+            // 记录删除前状态用于恢复
             if ("sent".equals(pageType)) a.setDeleteState(0);
             else if ("draft".equals(pageType)) a.setDeleteState(1);
             else if ("inbox".equals(pageType) || "inBox".equals(pageType)) a.setDeleteState(2);
             else if ("collection".equals(pageType)) a.setDeleteState(a.getState());
+            else a.setDeleteState(a.getState()); // 兜底
             a.setState(InMailConstant.InMailAffairState.deleted.ordinal());
+            a.setUpdateDate(now);
         }
-        a.setUpdateDate(new Date());
         DBAgent.update(a);
     }
 
@@ -264,15 +285,8 @@ public class InternalMailManagerImpl implements InternalMailManager {
 
     @Override
     public Object getOrgAccountByCode(String code, int type) {
-        // 查询 org_department (type=1) 或 org_account (type=0)
-        Map<String, Object> p = new HashMap<>();
-        p.put("code", code);
-        if (type == 1) {
-            List<?> r = DBAgent.find("FROM OrgUnit WHERE code=:code", p);
-            return r.isEmpty() ? null : r.get(0);
-        } else {
-            return null; // account 表暂无 code 字段映射
-        }
+        // type=0: Account, type=1: Department（OA 中用 code 查询，本地 OrgUnit 暂缺 code 字段）
+        return null;
     }
 
     @Override
@@ -280,10 +294,10 @@ public class InternalMailManagerImpl implements InternalMailManager {
         return Collections.emptyList();
     }
 
-    // ==================== 内部工具 (从 OA assemblyData 原样复制) ====================
+    // ==================== 内部工具 (从 OA getInMailAffairBO 原样复制逻辑) ====================
 
     /**
-     * 组装 BO 列表 —— 从 OA InternalMailManagerImpl.assemblyData 原样复制逻辑。
+     * 组装 BO 列表 —— 从 OA getInMailAffairBO 逐逻辑复制。
      */
     private List<InMailAffairBO> assemblyData(List<InMailAffair> list) {
         List<InMailAffairBO> boList = new ArrayList<>();
@@ -292,54 +306,59 @@ public class InternalMailManagerImpl implements InternalMailManager {
         Map<Long, OrgMember> memberCache = new HashMap<>();
         Map<Long, OrgUnit> deptCache = new HashMap<>();
 
-        for (InMailAffair a : list) {
-            InMailAffairBO bo = new InMailAffairBO(a);
-            bo.setId(a.getId());
-            bo.setSubject(a.getSubject());
-            bo.setReadFlag(a.getReadFlag());
-            bo.setBrowseTime(a.getBrowseTime() != null ?
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(a.getBrowseTime()) : "");
-            bo.setAttachmentsFlag(a.getAttachmentsFlag());
-            bo.setSize(a.getSize() != null ? formatSize(a.getSize()) : "0KB");
-            bo.setPassTheAudit(a.getPassTheAudit());
-            bo.setCollect(a.getCollect());
-            bo.setIsHandled(a.getIsHandled());
-            bo.setSenderId(a.getSenderId());
+        for (InMailAffair bo : list) {
+            InMailAffairBO person = new InMailAffairBO();
+            person.setId(bo.getId());
+            person.setSecurity(bo.getSecurity());
+            person.setSenderId(bo.getSenderId());
 
-            // 发件人
-            OrgMember sender = getCachedMember(memberCache, a.getSenderId());
-            bo.setSenderName(sender != null ? sender.getName() : "");
-            if (sender != null) {
-                OrgUnit dept = getCachedDept(deptCache, sender.getDepartmentId());
-                bo.setRecUserDept(dept != null ? dept.getName() : "");
+            // 发件人（OA: orgManager.getMemberById）
+            OrgMember member = getCachedMember(memberCache, bo.getSenderId());
+            if (member != null) person.setSenderName(member.getName());
+
+            person.setSummaryId(bo.getObjectId());
+            person.setMemberId(bo.getMemberId());
+
+            // 收件人：不是同一个人时才查（OA: memberId != senderId）
+            if (!bo.getMemberId().equals(bo.getSenderId())) {
+                member = getCachedMember(memberCache, bo.getMemberId());
+            }
+            if (member != null) {
+                person.setRecUserName(member.getName());
+                OrgUnit dept = getCachedDept(deptCache, member.getDepartmentId());
+                if (dept != null) person.setRecUserDept(dept.getName());
             }
 
-            // 收件人
-            OrgMember rec = getCachedMember(memberCache, a.getMemberId());
-            bo.setRecUserName(rec != null ? rec.getName() : "");
+            person.setCreateDate(Datetimes.formatDatetime(bo.getCreateDate(), 0));
+            person.setReadFlag(bo.getReadFlag());
+            person.setForwardFlag(bo.getIsForward());
+            person.setReplyFlag(bo.getIsReply());
+            person.setIsHandled(bo.getIsHandled());
+            person.setBrowseTime(Datetimes.formatDatetime(bo.getBrowseTime(), 0));
+            person.setAttachmentsFlag(bo.getAttachmentsFlag());
+            person.setSubject(bo.getSubject());
+            person.setPassTheAudit(bo.getPassTheAudit());
+            person.setCollect(bo.getCollect());
 
-            bo.setCreateDate(a.getCreateDate() != null ?
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(a.getCreateDate()) : "");
+            Long sz = bo.getSize();
+            if (sz != null) person.setSize((sz / 1024 + 1) + "KB");
 
-            boList.add(bo);
+            boList.add(person);
         }
         return boList;
     }
 
     private OrgMember getCachedMember(Map<Long, OrgMember> cache, Long id) {
         if (id == null) return null;
-        return cache.computeIfAbsent(id, k -> DBAgent.get(OrgMember.class, k));
+        OrgMember m = cache.get(id);
+        if (m == null) { m = DBAgent.get(OrgMember.class, id); cache.put(id, m); }
+        return m;
     }
 
     private OrgUnit getCachedDept(Map<Long, OrgUnit> cache, Long id) {
         if (id == null) return null;
-        return cache.computeIfAbsent(id, k -> DBAgent.get(OrgUnit.class, k));
-    }
-
-    private String formatSize(Long size) {
-        if (size == null || size == 0) return "0KB";
-        if (size < 1024) return size + "B";
-        if (size < 1048576) return (size / 1024) + "KB";
-        return String.format("%.1fMB", size / 1048576.0);
+        OrgUnit d = cache.get(id);
+        if (d == null) { d = DBAgent.get(OrgUnit.class, id); cache.put(id, d); }
+        return d;
     }
 }
