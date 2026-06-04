@@ -1,0 +1,63 @@
+{
+    "code": 200,
+    "data": [{
+        "subMenu": [{
+                "productCode": "TEST01",
+                "noReadMsgNum": 87,
+                "productId": "7454600778187097473",
+                "appName": "CIP应用测试哦!!!",
+                "affiarNum": 28,
+                "iconPc": null,
+                "fullName": "【测试01】  CIP应用测试哦!!!",
+                "id": "8686006365991618731",
+                "sort": 0,
+                "appCode": "3002",
+                "productName": "测试01"
+            },
+            {
+                "productCode": "SAP",
+                "noReadMsgNum": 99,
+                "productId": "41299198986046741",
+                "appName": "SAP",
+                "affiarNum": 91,
+                "iconPc": null,
+                "fullName": "【SAP】  SAP",
+                "id": "8266931057592124505",
+                "sort": 1,
+                "appCode": "2014",
+                "productName": "SAP"
+            },
+            {
+                "productCode": "Ctrip",
+                "noReadMsgNum": 36,
+                "productId": "-3913388158880627112",
+                "appName": "携程商旅",
+                "affiarNum": 35,
+                "iconPc": null,
+                "fullName": "【携程商旅】  携程商旅",
+                "id": "-4887915911795749204",
+                "sort": 2,
+                "appCode": "2002",
+                "productName": "携程商旅"
+            },
+            {
+                "productCode": "moxueyuan",
+                "noReadMsgNum": 44,
+                "productId": "8022926863388672",
+                "appName": "魔学院",
+                "affiarNum": 49,
+                "iconPc": null,
+                "fullName": "【魔学院】  魔学院",
+                "id": "8023515244548096",
+                "sort": 3,
+                "appCode": "2008",
+                "productName": "魔学院"
+            }
+        ],
+        "noReadMsgNum": 266,
+        "appName": "第三方待办",
+        "affiarNum": 203,
+        "id": "-1"
+    }],
+    "message": "成功"
+}

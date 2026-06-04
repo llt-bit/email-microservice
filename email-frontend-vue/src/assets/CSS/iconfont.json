@@ -1,0 +1,58 @@
+{
+  "id": "2473698",
+  "name": "中国电科十所邮箱",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "913745",
+      "name": "回复",
+      "font_class": "chakantiezihuifu",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "7325997",
+      "name": "编辑",
+      "font_class": "bianji",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "7817213",
+      "name": "编辑",
+      "font_class": "bianji1",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "12817379",
+      "name": "转发",
+      "font_class": "zhuanfa",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "1560786",
+      "name": "右箭头",
+      "font_class": "iconfontjiantou-copy",
+      "unicode": "e6c9",
+      "unicode_decimal": 59081
+    },
+    {
+      "icon_id": "1752792",
+      "name": "信封",
+      "font_class": "mail-open",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "6687300",
+      "name": "返回",
+      "font_class": "fanhui",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    }
+  ]
+}
