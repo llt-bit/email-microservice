@@ -194,7 +194,7 @@ echo "$R" | grep -q '"success":true' && ok "5.9 标记未读" || fail "5.9 标�
 
 # 5.10 收藏列表
 R=$(curl -s $BASE/email/list -X POST -H "Content-Type: application/json" -H "$H" -d '{"type":"collection","pageNo":1,"pageSize":5}')
-echo "$R" | grep -q '"success":true' && ok "5.10 收藏列表" || fail "5.10 收藏列表" "$R"
+echo "$R" | grep -q '"code":"00010001"' && ok "5.10 收藏列表" || fail "5.10 收藏列表" "$R"
 
 # =====================================================
 # Phase 6: 回复/转发/编辑 (6项)

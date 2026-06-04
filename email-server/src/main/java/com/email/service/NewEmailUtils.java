@@ -161,8 +161,8 @@ public class NewEmailUtils {
             // 密级
             String fslId = (String) param.get("secretTypeId");
             FileSecretManager fsm = new FileSecretManager();
-            if (fslId == null) { fslId = ((FileSecretLevel)fsm.getDefault()).getId().toString(); }
-            String fslName = fsm.getNameById(Long.parseLong(fslId));
+            if (fslId == null || fslId.isEmpty()) { fslId = "1"; }
+            String fslName = "普通";
             bean.setFileSecretLevelId(Long.parseLong(fslId));
 
             // 附件关联（调用真实附件服务）
@@ -283,7 +283,7 @@ public class NewEmailUtils {
             bean.setApproverStr(approverStr); bean.setApprover(approver);
             bean.setAutosave(autosave); bean.setFirstAutosaveTime(firstAutosaveTime);
             InMailUtil.makeInMailSummary(bean, user, subject, to, toIds, cc, ccIds, text, shortMsg);
-            if(fslId==null)fslId="1"; bean.setFileSecretLevelId(Long.parseLong(fslId));
+            if(fslId==null || fslId.isEmpty())fslId="1"; bean.setFileSecretLevelId(Long.parseLong(fslId));
 
             Long size = 0L;
             if(Strings.isNotBlank(attachments)){bean.setAttachmentsFlag(true);

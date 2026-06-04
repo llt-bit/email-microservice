@@ -7,30 +7,6 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
 
     <title>内部邮箱</title>
-
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/skin/dist/common/skin.css" />-->
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/skin/dist/components/components_layout.css" />-->
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/skin/dist/components/components_theme_default.css" />-->
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/common/css/peoplecard.css" />-->
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/common/css/dd.css" />-->
-<!--    <link rel="stylesheet" type="text/css" href="/seeyon/main/skin/frame/default/default_common.css" />-->
-<!--    <script src="/seeyon/common/all-min.js" type="text/javascript"></script>-->
-<!--    <script src="/seeyon/common/js/ui/calendar/calendar-language.js" type="text/javascript"></script>-->
-
-
-    <script>
-      <%= htmlWebpackPlugin.options.v5options.script %>
-    </script>
-    <% if (!!htmlWebpackPlugin.options.v5options.css && !!htmlWebpackPlugin.options.v5options.css.length) { %>
-    <% htmlWebpackPlugin.options.v5options.css.forEach(function(item){%>
-    <link href="<%= item %>" rel="stylesheet"/>
-    <% }) %>
-    <% } %>
-    <% if (!!htmlWebpackPlugin.options.v5options.js && !!htmlWebpackPlugin.options.v5options.js.length) { %>
-    <% htmlWebpackPlugin.options.v5options.js.forEach(function(item){%>
-    <script src="<%= item %>" type="text/javascript"></script>
-    <% }) %>
-    <% } %>
   </head>
   <body>
     <noscript>

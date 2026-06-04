@@ -30,7 +30,7 @@ public class EmailController {
     // ==================== 列表 ====================
 
     @PostMapping("/list")
-    public R<Map<String, Object>> list(@RequestBody Map<String, Object> params) {
+    public Map<String, Object> list(@RequestBody Map<String, Object> params) {
         Long userId = UserContextHolder.getUserId();
         Map<String, Object> result = new LinkedHashMap<>();
 
@@ -58,13 +58,18 @@ public class EmailController {
             default:       mgr.findInboxAffair(fi, userId, p); break;
         }
 
-        result.put("code", "00010001");
-        result.put("records", fi.getData());
-        result.put("total", fi.getTotal());
-        result.put("current", fi.getPage());
-        result.put("size", fi.getSize());
-        result.put("pages", fi.getPages());
-        return R.ok(result);
+        // OA 前端使用 response.data.msg 取数据, response.data.code 判断成功
+        // 直接返回 OA 兼容格式: {"code":"00010001","msg":{...}}
+        Map<String, Object> oaResponse = new LinkedHashMap<>();
+        oaResponse.put("code", "00010001");
+        Map<String, Object> msg = new LinkedHashMap<>();
+        msg.put("records", fi.getData());
+        msg.put("total", fi.getTotal());
+        msg.put("current", fi.getPage());
+        msg.put("size", fi.getSize());
+        msg.put("pages", fi.getPages());
+        oaResponse.put("msg", msg);
+        return oaResponse;
     }
 
     // ==================== 详情 ====================
@@ -117,7 +122,7 @@ public class EmailController {
     // ==================== 发送/草稿 ====================
 
     @PostMapping("/send")
-    public R<Map<String, Object>> send(@RequestBody Map<String, Object> params) {
+    public Map<String, Object> send(@RequestBody Map<String, Object> params) {
         String type = Objects.toString(params.get("type"), "send");
         Map<String, Object> result;
 
@@ -126,11 +131,7 @@ public class EmailController {
         } else {
             result = NewEmailUtils.sendEmail(params, mgr);
         }
-
-        if ("10001".equals(result.get("code"))) {
-            return R.ok(result);
-        }
-        return R.fail(500, (String) result.getOrDefault("msg", "发送失败"));
+        return result; // 直接返回OA格式: {"code":"10001","msg":"...","summaryId":...,"affairId":...}
     }
 
     // ==================== 操作 ====================
@@ -188,20 +189,27 @@ public class EmailController {
     // ==================== 数量 ====================
 
     @GetMapping("/counts")
-    public R<Map<String, Object>> counts() {
+    public Map<String, Object> counts() {
         Long userId = UserContextHolder.getUserId();
         Map<String, Object> p = new HashMap<>(); p.put("memberId", userId);
         int inbox = mgr.findInboxNextAffair(p);
 
-        // 聚合统计各种状态
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("inBox", inbox);
-        result.put("draft", countByState(1, userId));
-        result.put("sent", countByState(0, userId));
-        result.put("delete", countByState(3, userId));
-        result.put("encryption", countByState(5, userId));
-        result.put("collect", countCollect(userId));
-        return R.ok(result);
+        Map<String, Object> msg = new LinkedHashMap<>();
+        msg.put("allNum", inbox);
+        msg.put("inBox", inbox);
+        msg.put("draft", countByState(1, userId));
+        msg.put("sent", countByState(0, userId));
+        msg.put("delete", countByState(3, userId));
+        msg.put("encryption", countByState(5, userId));
+        msg.put("collect", countCollect(userId));
+        msg.put("notRead", 0);
+        msg.put("handled", 0);
+        msg.put("notHandled", 0);
+
+        Map<String, Object> oaResp = new LinkedHashMap<>();
+        oaResp.put("code", "00010001");
+        oaResp.put("msg", msg);
+        return oaResp;
     }
 
     // ==================== 回复/转发/编辑 ====================
@@ -287,13 +295,16 @@ public class EmailController {
     }
 
     @PostMapping("/getSecretList")
-    public R<List<Map<String, Object>>> getSecretList(@RequestBody Map<String, String> params) {
-        // 独立部署返回默认密级列表
+    public Map<String, Object> getSecretList(@RequestBody Map<String, String> params) {
+        // 返回 OA 兼容格式: {"code":"00010001","msg":"[{...}]"}
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("id", "1"); m.put("name", "普通"); m.put("level", 0); m.put("isFileSecret", 0);
+        m.put("id", 1); m.put("name", "普通"); m.put("level", 0); m.put("isFileSecret", 0);
         list.add(m);
-        return R.ok(list);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("code", "00010001");
+        result.put("msg", list);  // 直接传数组，Jackson 序列化为 JSON 数组
+        return result;
     }
 
     @PostMapping("/isSecret")
@@ -344,7 +355,7 @@ public class EmailController {
     }
 
     @PostMapping("/sendEmailMsg")
-    public R<Map<String, Object>> sendEmailMsg(@RequestBody Map<String, Object> params) {
+    public Map<String, Object> sendEmailMsg(@RequestBody Map<String, Object> params) {
         params.put("sendUserId", params.get("senderName"));
         return send(params);
     }
