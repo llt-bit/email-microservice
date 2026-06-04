@@ -199,17 +199,21 @@ public class EmailController {
 
     @PostMapping("/reply")
     public R<Map<String, Object>> reply(@RequestBody Map<String, Object> params) {
-        return R.ok(NewEmailUtils.reply(params, mgr));
+        return R.ok(NewEmailUtils.replyData(params));
     }
 
     @PostMapping("/allReply")
     public R<Map<String, Object>> allReply(@RequestBody Map<String, Object> params) {
-        return R.ok(NewEmailUtils.allReply(params, mgr));
+        Map<String, Object> data = NewEmailUtils.replyData(params);
+        data.put("mark", "allReply");
+        return R.ok(data);
     }
 
     @PostMapping("/forward")
     public R<Map<String, Object>> forward(@RequestBody Map<String, Object> params) {
-        return R.ok(NewEmailUtils.forward(params, mgr));
+        Map<String, Object> data = NewEmailUtils.replyData(params);
+        data.put("mark", "forward");
+        return R.ok(data);
     }
 
     @PostMapping("/compile")

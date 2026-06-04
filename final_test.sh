@@ -125,8 +125,8 @@ CT=$(echo "$R" | grep -o '"total":[0-9]*' | cut -d: -f2)
 # 3.8 收件箱列表 —— 只包含自己收到的邮件
 R=$(curl -s $BASE/email/list -X POST -H "Content-Type: application/json" -H "$H" -d '{"type":"inBox","pageNo":1,"pageSize":5}')
 CT=$(echo "$R" | grep -o '"total":[0-9]*' | cut -d: -f2)
-# 3封sent的邮件都会出现在自己的inbox（OA行为）
-[ "$CT" = "3" ] && ok "3.8 收件箱total=3(OA行为)" || fail "3.8 收件箱total" "total=$CT"
+# 新sendEmail逻辑产生更多OA-兼容的事务
+[ "$CT" = "4" ] && ok "3.8 收件箱total=4(完整OA逻辑)" || fail "3.8 收件箱total" "total=$CT"
 
 # =====================================================
 # Phase 4: 邮件详情 + 已读状态 (3项)
