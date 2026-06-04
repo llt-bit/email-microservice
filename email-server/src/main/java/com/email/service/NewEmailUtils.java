@@ -165,10 +165,24 @@ public class NewEmailUtils {
             String fslName = fsm.getNameById(Long.parseLong(fslId));
             bean.setFileSecretLevelId(Long.parseLong(fslId));
 
-            // 附件
+            // 附件关联（调用真实附件服务）
             Long size = 0L;
             if (Strings.isNotBlank(attachments)) {
                 bean.setAttachmentsFlag(true);
+                try {
+                    final Long sid = bean.getId();
+                    String[] fileIds = attachments.split(",");
+                    com.email.platform.JDBCAgent agent = new com.email.platform.JDBCAgent();
+                    for (String fid : fileIds) {
+                        try {
+                            List<Object> plist = new ArrayList<>();
+                            plist.add(sid); plist.add(Long.parseLong(fid.trim()));
+                            agent.execute("UPDATE email_attachment SET summary_id=? WHERE id=?", plist);
+                        } catch(Exception ig) {}
+                    }
+                    agent.close();
+                    bean.setAttachmentsFlag(true);
+                } catch(Exception e) { log.error("附件关联失败", e); }
             } else { bean.setAttachmentsFlag(false); }
             if (Strings.isNotBlank(text)) { String tmpPath = System.getProperty("java.io.tmpdir")+File.separator+"正文"+bean.getId()+".html";
                 writerToFile(tmpPath, text.getBytes()); File f = new File(tmpPath); if(f.exists()) size+=f.length(); delteFile(tmpPath); }
@@ -272,7 +286,9 @@ public class NewEmailUtils {
             if(fslId==null)fslId="1"; bean.setFileSecretLevelId(Long.parseLong(fslId));
 
             Long size = 0L;
-            if(Strings.isNotBlank(attachments))bean.setAttachmentsFlag(true); else bean.setAttachmentsFlag(false);
+            if(Strings.isNotBlank(attachments)){bean.setAttachmentsFlag(true);
+                try{final Long sid=bean.getId();String[] fids=attachments.split(",");com.email.platform.JDBCAgent ag=new com.email.platform.JDBCAgent();for(String fid:fids)try{List<Object>pl=new ArrayList<>();pl.add(sid);pl.add(Long.parseLong(fid.trim()));ag.execute("UPDATE email_attachment SET summary_id=? WHERE id=?",pl);}catch(Exception ig){}ag.close();}catch(Exception e){log.error("附件关联失败",e);}
+            } else bean.setAttachmentsFlag(false);
             if(Strings.isNotBlank(text)){String tmpPath = System.getProperty("java.io.tmpdir")+File.separator+"draft_"+bean.getId()+".html"; writerToFile(tmpPath,text.getBytes()); File f=new File(tmpPath); if(f.exists())size+=f.length(); delteFile(tmpPath);}
             bean.setSize(size);
             bean.setTimedTask(timedTask);

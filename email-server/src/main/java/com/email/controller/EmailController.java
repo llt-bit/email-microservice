@@ -6,6 +6,7 @@ import com.email.manager.InternalMailManager;
 import com.email.platform.*;
 import com.email.platform.entity.OrgMember;
 import com.email.security.UserContextHolder;
+import com.email.service.AttachmentService;
 import com.email.service.NewEmailUtils;
 import com.email.util.InMailUtil;
 import org.springframework.web.bind.annotation.*;
@@ -101,6 +102,14 @@ public class EmailController {
         data.put("kuaWang", s.getKuaWang());
         data.put("approverStr", s.getApproverStr());
         data.put("attachments", s.getAttachments());
+
+        // 附件列表
+        try {
+            AttachmentService as = (AttachmentService) AppContext.getBean("attachmentManager");
+            if (as != null && s.getId() != null) {
+                data.put("attachmentList", as.listBySummaryId(s.getId()));
+            }
+        } catch(Exception ig) {}
 
         return R.ok(data);
     }

@@ -24,15 +24,10 @@ spring:
     type: caffeine
     caffeine:
       spec: maximumSize=10000,expireAfterWrite=10m
-  # Hibernate JPA 配置（替代 MyBatis，兼容 OA HQL）
+  # 禁用 JPA 自动配置（使用 Hibernate 5 原生 SessionFactory）
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL57InnoDBDialect
-        format_sql: false
 
 # JWT 配置
 email:
