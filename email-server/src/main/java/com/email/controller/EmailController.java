@@ -286,11 +286,99 @@ public class EmailController {
         return R.ok();
     }
 
+    @PostMapping("/getSecretList")
+    public R<List<Map<String, Object>>> getSecretList(@RequestBody Map<String, String> params) {
+        // 独立部署返回默认密级列表
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", "1"); m.put("name", "普通"); m.put("level", 0); m.put("isFileSecret", 0);
+        list.add(m);
+        return R.ok(list);
+    }
+
+    @PostMapping("/isSecret")
+    public R<Boolean> isSecret(@RequestBody Map<String, String> params) {
+        return R.ok(false);
+    }
+
+    @PostMapping("/MailFileSecret")
+    public R<Map<String, Object>> mailFileSecret(@RequestBody Map<String, String> params) {
+        return R.ok(new LinkedHashMap<>());
+    }
+
+    @PostMapping("/MailFileSecretVerify")
+    public R<Map<String, Object>> mailFileSecretVerify(@RequestBody Map<String, Object> params) {
+        return R.ok(new LinkedHashMap<>());
+    }
+
+    @PostMapping("/MailPersonSecretVerify")
+    public R<Map<String, Object>> mailPersonSecretVerify(@RequestBody Map<String, Object> params) {
+        return R.ok(new LinkedHashMap<>());
+    }
+
+    @GetMapping("/getMemberByDeptApproverRole")
+    public R<List<Map<String, Object>>> getMemberByDeptApproverRole(@RequestParam(required = false) String secretTypeId) {
+        return R.ok(Collections.emptyList());
+    }
+
+    @PostMapping("/MailGroupType")
+    public R<List<Map<String, String>>> mailGroupType() {
+        return R.ok(new ArrayList<>());
+    }
+
+    @PostMapping("/flowMsg")
+    public R<String> flowMsg(@RequestBody Map<String, String> params) {
+        return R.ok("");
+    }
+
+    @PostMapping("/revokeMsg")
+    public R<Map<String, String>> revokeMsg(@RequestBody Map<String, String> params) {
+        Map<String, String> m = new LinkedHashMap<>();
+        m.put("rescindFlag", "");
+        return R.ok(m);
+    }
+
+    @GetMapping("/packFile/{summaryId}")
+    public R<String> packFile(@PathVariable Long summaryId) {
+        return R.fail("打包下载功能开发中");
+    }
+
+    @PostMapping("/sendEmailMsg")
+    public R<Map<String, Object>> sendEmailMsg(@RequestBody Map<String, Object> params) {
+        params.put("sendUserId", params.get("senderName"));
+        return send(params);
+    }
+
     @PostMapping("/preview")
     public R<Map<String, String>> preview(@RequestBody Map<String, String> params) {
+        String fileId = params.getOrDefault("fileId", "");
+        // OA 通过 FileManager.getFile 获取预览URL，独立部署返回 MinIO 路径
+        try {
+            AttachmentService as = (AttachmentService) AppContext.getBean("attachmentManager");
+            if (as != null && !fileId.isEmpty()) {
+                String url = as.getDownloadUrl(Long.parseLong(fileId));
+                Map<String, String> m = new LinkedHashMap<>();
+                m.put("url", url != null ? url : fileId);
+                return R.ok(m);
+            }
+        } catch(Exception ig) {}
         Map<String, String> m = new LinkedHashMap<>();
-        m.put("url", params.getOrDefault("fileId", ""));
+        m.put("url", "");
         return R.ok(m);
+    }
+
+    @PostMapping("/judgeRescindMail")
+    public R<Map<String, String>> judgeRescindMail(@RequestBody Map<String, String> params) {
+        // OA 撤销前判断邮件是否可撤销（有人已读/已转发/已回复不可撤销）
+        Map<String, String> m = new LinkedHashMap<>();
+        m.put("code", "10001");
+        m.put("msg", "邮件可撤销");
+        return R.ok(m);
+    }
+
+    @PostMapping("/export")
+    public R<Map<String, Object>> exportEmail(@RequestBody Map<String, Object> params) {
+        return R.ok(NewEmailUtils.exportEmail(params, mgr));
     }
 
     @PostMapping("/mailSignature")
@@ -300,9 +388,6 @@ public class EmailController {
 
     @PostMapping("/showKuaWang")
     public R<Boolean> showKuaWang() { return R.ok(false); }
-
-    @PostMapping("/getSecretList")
-    public R<List<Object>> getSecretList() { return R.ok(Collections.emptyList()); }
 
     @GetMapping("/getUUID")
     public R<String> getUUID() { return R.ok(String.valueOf(UUIDLong.longValue())); }
