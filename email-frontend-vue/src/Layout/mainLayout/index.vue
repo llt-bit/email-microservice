@@ -878,10 +878,10 @@ export default {
       
       
       if (type == 1) {
-        info_btn0.classList.add("isActived");
-        info_btn1.classList.remove("isActived");
-        info_btn2.classList.remove("isActived");
-        info_btn3.classList.remove("isActived");
+        info_btn0 && info_btn0.classList.add("isActived");
+        info_btn1 && info_btn1.classList.remove("isActived");
+        info_btn2 && info_btn2.classList.remove("isActived");
+        info_btn3 && info_btn3.classList.remove("isActived");
         this.isShow = true;
         this.isShowAllRead = false;
         this.isShowRead = false;
@@ -920,10 +920,10 @@ export default {
         }
         // 如果是二级菜单
       } else if (type == 2) {
-        info_btn0.classList.remove("isActived");
-        info_btn1.classList.add("isActived");
-        info_btn2.classList.remove("isActived");
-        info_btn3.classList.remove("isActived");
+        info_btn0 && info_btn0.classList.remove("isActived");
+        info_btn1 && info_btn1.classList.add("isActived");
+        info_btn2 && info_btn2.classList.remove("isActived");
+        info_btn3 && info_btn3.classList.remove("isActived");
         this.readBtn = false;
         this.noReadBtn = false;
         this.isShow = true;
@@ -961,10 +961,10 @@ export default {
 
         
       } else if (type == 3) {
-        info_btn0.classList.remove("isActived");
-        info_btn1.classList.remove("isActived");
-        info_btn2.classList.add("isActived");
-        info_btn3.classList.remove("isActived");
+        info_btn0 && info_btn0.classList.remove("isActived");
+        info_btn1 && info_btn1.classList.remove("isActived");
+        info_btn2 && info_btn2.classList.add("isActived");
+        info_btn3 && info_btn3.classList.remove("isActived");
         this.readBtn = false;
         this.noReadBtn = true;
         this.isShow = false;
@@ -1004,10 +1004,10 @@ export default {
 
         //弹框
       } else {
-        info_btn0.classList.remove("isActived");
-        info_btn1.classList.remove("isActived");
-        info_btn2.classList.remove("isActived");
-        info_btn3.classList.add("isActived");
+        info_btn0 && info_btn0.classList.remove("isActived");
+        info_btn1 && info_btn1.classList.remove("isActived");
+        info_btn2 && info_btn2.classList.remove("isActived");
+        info_btn3 && info_btn3.classList.add("isActived");
         this.readBtn = true;
         this.noReadBtn = false;
         this.isShow = false;
