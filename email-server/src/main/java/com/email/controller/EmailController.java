@@ -407,13 +407,15 @@ public class EmailController {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = com.alibaba.fastjson.JSON.parseObject(searchWord, Map.class);
             for (Map.Entry<String, Object> e : map.entrySet()) {
+                String val = e.getValue() != null ? e.getValue().toString() : "";
+                if (val.trim().isEmpty()) continue;  // 跳过空值
                 switch (e.getKey()) {
-                    case "0": p.put("subject", e.getValue()); p.put("senderName", e.getValue()); break;
-                    case "1": p.put("subject", e.getValue()); break;
-                    case "3": p.put("sendtoName", e.getValue()); break;
-                    case "5": p.put("senderName", e.getValue()); break;
-                    case "6": p.put("contentName", e.getValue()); break;
-                    case "7": p.put("attachName", e.getValue()); break;
+                    case "0": p.put("subject", val); p.put("senderName", val); break;
+                    case "1": p.put("subject", val); break;
+                    case "3": p.put("sendtoName", val); break;
+                    case "5": p.put("senderName", val); break;
+                    case "6": p.put("contentName", val); break;
+                    case "7": p.put("attachName", val); break;
                 }
             }
         } catch (Exception ignored) {}
