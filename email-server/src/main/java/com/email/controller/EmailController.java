@@ -32,8 +32,6 @@ public class EmailController {
     @PostMapping("/list")
     public Map<String, Object> list(@RequestBody Map<String, Object> params) {
         Long userId = UserContextHolder.getUserId();
-        Map<String, Object> result = new LinkedHashMap<>();
-
         String type = Objects.toString(params.get("type"), "inBox");
         int pageNo = params.get("pageNo") != null ? (Integer) params.get("pageNo") : 1;
         int pageSize = params.get("pageSize") != null ? (Integer) params.get("pageSize") : 15;
@@ -58,18 +56,14 @@ public class EmailController {
             default:       mgr.findInboxAffair(fi, userId, p); break;
         }
 
-        // OA 前端使用 response.data.msg 取数据, response.data.code 判断成功
-        // 直接返回 OA 兼容格式: {"code":"00010001","msg":{...}}
-        Map<String, Object> oaResponse = new LinkedHashMap<>();
-        oaResponse.put("code", "00010001");
-        Map<String, Object> msg = new LinkedHashMap<>();
-        msg.put("records", fi.getData());
-        msg.put("total", fi.getTotal());
-        msg.put("current", fi.getPage());
-        msg.put("size", fi.getSize());
-        msg.put("pages", fi.getPages());
-        oaResponse.put("msg", msg);
-        return oaResponse;
+        // emails API返回: {code:"00010001", msg:{records:[...], total:N}}
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("code", "00010001");
+        Map<String, Object> inner = new LinkedHashMap<>();
+        inner.put("records", fi.getData());
+        inner.put("total", fi.getTotal());
+        result.put("msg", inner);
+        return result;
     }
 
     // ==================== 详情 ====================
@@ -194,22 +188,23 @@ public class EmailController {
         Map<String, Object> p = new HashMap<>(); p.put("memberId", userId);
         int inbox = mgr.findInboxNextAffair(p);
 
-        Map<String, Object> msg = new LinkedHashMap<>();
-        msg.put("allNum", inbox);
-        msg.put("inBox", inbox);
-        msg.put("draft", countByState(1, userId));
-        msg.put("sent", countByState(0, userId));
-        msg.put("delete", countByState(3, userId));
-        msg.put("encryption", countByState(5, userId));
-        msg.put("collect", countCollect(userId));
-        msg.put("notRead", 0);
-        msg.put("handled", 0);
-        msg.put("notHandled", 0);
+        // OA 前端期望: {code:200, data:{inBox:N, draft:N, ...}}
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("allNum", inbox);
+        data.put("inBox", inbox);
+        data.put("draft", countByState(1, userId));
+        data.put("sent", countByState(0, userId));
+        data.put("delete", countByState(3, userId));
+        data.put("encryption", countByState(5, userId));
+        data.put("collect", countCollect(userId));
+        data.put("notRead", 0);
+        data.put("handled", 0);
+        data.put("notHandled", 0);
 
-        Map<String, Object> oaResp = new LinkedHashMap<>();
-        oaResp.put("code", "00010001");
-        oaResp.put("msg", msg);
-        return oaResp;
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
 
     // ==================== 回复/转发/编辑 ====================
