@@ -792,7 +792,7 @@ export default {
         recipient: "",
         copyfor: "",
       },
-      serverUrl: "/api/attachment/upload", //上传url
+      serverUrl: "/seeyon/rest/attachment", //上传url
       show: false, //是否显示 废弃
       fileList: [], //文件列表
       dialogVisible: true, //选择密级的弹出框是否隐藏
@@ -912,7 +912,9 @@ export default {
     // this.saves();
     // this.isshow = true; //暂缓显示编辑板
     api.emlianum().then((res) => {
-      this.$store.commit("setnum", res.msg || res);
+      if (res.code == 200) {
+        this.$store.commit("setnum", res.data);
+      }
     });
     // this.secretTypeIdold = this.msg.secretTypeId
 
@@ -1295,13 +1297,12 @@ export default {
       };
       // loadingInstance.close();
       api.searchQueryStaff(obj).then((res) => {
-        const list = res.msg || res.data || res;
-        if (Array.isArray(list)) {
-          this.searchList = list;
-          list.forEach((item) => {
+        if (res.code == 200) {
+          this.searchList = res.data;
+          res.data.forEach((item) => {
             this.receiversOptions.push({
               ...item,
-              operationName: `【${item.miji||''}】 ${item.name} (${item.loginName}-${item.department})`,
+              operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
               value: item.name + `(${item.department})`,
             });
           });
@@ -1319,10 +1320,10 @@ export default {
         isS: "2",
       };
       api.searchQueryStaff(obj).then((res) => {
-        
+        if (res.code == 200) {
           // loading.close()
           // console.log("搜索人员", res.data);
-          (res.msg || res.data || []).forEach((item) => {
+          res.data.forEach((item) => {
             this.copyReceiversOptions.push({
               ...item,
               operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
@@ -1343,10 +1344,10 @@ export default {
         isS: "1",
       };
       api.searchQueryStaff(obj).then((res) => {
-        
+        if (res.code == 200) {
           // loading.close()
           // console.log("搜索人员", res);
-          (res.msg || res.data || []).forEach((item) => {
+          res.data.forEach((item) => {
             this.searchName = item.name;
             this.searchValue = `Member|${item.memberId}`;
             this.approverOptions.push({
@@ -1378,9 +1379,9 @@ export default {
           this.timer = setTimeout(() => {
             api.searchQueryStaff(obj).then((res) => {
               // console.log("搜索人员", res);
-              
-                this.searchList = res.msg || res.data;
-                (res.msg || res.data || []).forEach((item) => {
+              if (res.code == 200) {
+                this.searchList = res.data;
+                res.data.forEach((item) => {
                   this.receiversOptions.push({
                     ...item,
                     operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
@@ -1393,9 +1394,9 @@ export default {
         } else {
           api.searchQueryStaff(obj).then((res) => {
             // console.log("搜索人员", res);
-            
-              this.searchList = res.msg || res.data;
-              (res.msg || res.data || []).forEach((item) => {
+            if (res.code == 200) {
+              this.searchList = res.data;
+              res.data.forEach((item) => {
                 this.receiversOptions.push({
                   ...item,
                   operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
@@ -1492,10 +1493,10 @@ export default {
             //       spinner: "el-icon-loading",//自定义加载图标类名
             //     });
             api.searchQueryStaff(obj).then((res) => {
-              
+              if (res.code == 200) {
                 // loading.close()
                 // console.log("搜索人员", res.data);
-                (res.msg || res.data || []).forEach((item) => {
+                res.data.forEach((item) => {
                   this.copyReceiversOptions.push({
                     ...item,
                     operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
@@ -1507,9 +1508,9 @@ export default {
           }, 600);
         } else {
           api.searchQueryStaff(obj).then((res) => {
-            
+            if (res.code == 200) {
               // console.log("搜索人员", res.data);
-              (res.msg || res.data || []).forEach((item) => {
+              res.data.forEach((item) => {
                 this.copyReceiversOptions.push({
                   ...item,
                   operationName: `【${item.miji}】 ${item.name} (${item.loginName}-${item.department})`,
@@ -1617,10 +1618,10 @@ export default {
             //     spinner: "el-icon-loading",//自定义加载图标类名
             //   });
             api.searchQueryStaff(obj).then((res) => {
-              
+              if (res.code == 200) {
                 // loading.close()
                 // console.log("搜索人员", res);
-                (res.msg || res.data || []).forEach((item) => {
+                res.data.forEach((item) => {
                   this.searchName = item.name;
                   this.searchValue = `Member|${item.memberId}`;
                   this.approverOptions.push({
@@ -1634,9 +1635,9 @@ export default {
           }, 600);
         } else {
           api.searchQueryStaff(obj).then((res) => {
-            
+            if (res.code == 200) {
               //   console.log("搜索人员", res);
-              (res.msg || res.data || []).forEach((item) => {
+              res.data.forEach((item) => {
                 this.searchName = item.name;
                 this.searchValue = `Member|${item.memberId}`;
                 this.approverOptions.push({
@@ -1788,7 +1789,7 @@ export default {
       }
 
       window.location.href = encodeURI(
-        `/api/attachment/download/${encodeURI(file.fileUrl)}?createDate=${
+        `/seeyon/rest/attachment/file/${encodeURI(file.fileUrl)}?createDate=${
           file.createdate
         }&fileName=${encodeURIComponent(file.filename)}&moduleTypePlugin=12&sourceIdPlugin=${sourceIdPluginTemp}&virtualIdPlugin=${virtualIdPluginTemp}`
       );
@@ -2124,7 +2125,7 @@ export default {
           if (this.$store.state.isredNet) {
             console.log(fileList);
             api.MailFileSecret(obj).then((res) => {
-              
+              if (res.code == 200) {
                 this.$message.success("文件密级校验成功");
                 // 兼容匹配拖拽上传
                 if (isDragUpload === "dragUpload") {
@@ -2170,7 +2171,7 @@ export default {
       obj.fileNames = obj.fileNames.toString();
       api.MailFileSecret(obj).then((res) => {
         // console.log(res);
-        
+        if (res.code == 200) {
           this.$message.success("文件密级校验成功");
           // this.$refs.upload.submit();
         } else {
@@ -2197,7 +2198,7 @@ export default {
 
       api.MailFileSecret(obj).then((res) => {
         // console.log(res);
-        
+        if (res.code == 200) {
           this.$message.success("文件密级校验成功");
           this.$refs.upload.submit();
         } else {
@@ -2209,7 +2210,7 @@ export default {
       //     if (currLength != this.maxFileLen) return
       //     api.MailFileSecret(obj).then(res => {
       //         console.log(res)
-      //         
+      //         if (res.code == 200) {
       //             this.$message.success('文件密级校验成功');
       //             this.$refs.upload.submit();
       //         } else {
@@ -2231,7 +2232,7 @@ export default {
       //     if(currLength == this.maxFileLen) {
       //     api.MailFileSecret(obj).then(res =>{
       //         console.log(res)
-      //         
+      //         if  (res.code == 200){
       //             this.$refs.upload.submit();
       //         }else {
       //             this.$message.error(res.msg);
@@ -2339,9 +2340,12 @@ export default {
           this.$message.success(res.msg);
           api.emlianum().then((res) => {
             // console.log(res);
-              this.num = res.msg || res;
-              this.$store.commit("setnum", res.msg || res);
+            if (res.code == 200) {
+              this.num = res.data;
+              this.$store.commit("setnum", res.data);
               this.$store.commit("changeCancelSaveDraftRandom");
+            } else {
+              // console.log('手动存为草稿失败',res.message)
               this.$message.error(res.message);
             }
           });
@@ -3887,7 +3891,7 @@ export default {
         quill.insertEmbed(
           length,
           "image",
-          `/api/attachment/download/${encodeURI(
+          `/seeyon/fileUpload.do?method=showRTE&fileId=${encodeURI(
             res.atts[0].fileUrl
           )}&createDate=${res.atts[0].createdate.slice(
             0,

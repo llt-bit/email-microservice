@@ -16,7 +16,7 @@ export default new Vuex.Store({
     },
     state: {
 
-        isredNet: true, // 显示密级选择控件
+        isredNet: true, //是否打包成红蓝网
         isWriteEamil: false, //是否写信
         passTheAudit:'',
         lxr: 6,
@@ -498,14 +498,12 @@ export default new Vuex.Store({
         getMailInfo({ state, commit, dispatch }) {
             // 获取 邮箱 信息
             api.emlianum().then((res) => {
-                // 适配独立部署API: code="00010001", 数据在 msg 字段
-                const code = res.code || (res.data && res.data.code);
-                const emailInfo = res.msg || res.data;
-                if (emailInfo) {
+                if (res.code == 200) {
                     // 存储(初始化) 请求得到的菜单信息(邮件数量、新增标签(文件夹))
-                    commit("setnum", emailInfo);
+                    commit("setnum", res.data);
+                    // console.log('getMailInfo获取邮箱信息 :>> ', res.data);
                     // 获取 新建文件夹信息
-                    const { customFloder } = emailInfo;
+                    const { customFloder } = res.data;
                     if (Array.isArray(customFloder)) {
                         // 存储 自定义文件夹信息
                         state.customFloder = customFloder;

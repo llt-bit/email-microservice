@@ -199,7 +199,9 @@ export default {
   },
   created() {
     api.emlianum().then((res)=>{
-      this.$store.commit('setnum', res.msg || res)
+      if (res.code == 200) {
+        this.$store.commit('setnum',res.data)
+      }
     })
   },
   mounted() {
