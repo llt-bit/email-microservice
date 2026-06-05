@@ -103,9 +103,11 @@ import { createNamespacedHelpers } from "vuex";
 import { eventBus } from "@/main.js";
 // 导入 api
 import api from "@/api/api";
+import ContextMenu from "./contextMenu.vue";
 const { mapState, mapMutations } = createNamespacedHelpers("contextMenu");
 export default {
   name: "MenuItem",
+  components: { ContextMenu },
   props: {
     // 菜单信息
     data: {

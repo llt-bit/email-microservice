@@ -60,7 +60,7 @@ public class EmailController {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("code", "00010001");
         Map<String, Object> inner = new LinkedHashMap<>();
-        inner.put("records", fi.getData());
+        inner.put("data", fi.getData());
         inner.put("total", fi.getTotal());
         result.put("msg", inner);
         return result;
